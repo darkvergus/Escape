@@ -68,8 +68,6 @@ DerivedDataCache/*
 *.VC.opendb
 *.VC.db
 
-.vsconfig
-
 # Local Plugins
 **/Plugins/**/Intermediate/*
 **/Plugins/**/Binaries/*
