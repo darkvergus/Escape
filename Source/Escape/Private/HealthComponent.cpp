@@ -60,11 +60,15 @@ void UHealthComponent::SetHealth(float NewHealth)
 	}
 }
 
+float UHealthComponent::GetHealth() const
+{
+	return CurrentHealth;
+}
+
 bool UHealthComponent::IsAlive() const
 {
 	return CurrentHealth > 0.0f;
 }
-
 
 void UHealthComponent::Die()
 {
