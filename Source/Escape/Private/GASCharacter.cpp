@@ -88,6 +88,8 @@ bool AGASCharacter::ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, 
 void AGASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	
 }
 
