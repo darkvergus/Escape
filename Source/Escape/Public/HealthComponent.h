@@ -22,9 +22,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth = 100.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Health")
-	float CurrentHealth;
-
 	/** Damage/healing API */
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void TakeDamage(float DamageAmount);
@@ -34,6 +31,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetHealth(float NewHealth);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetHealth() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	bool IsAlive() const;
@@ -51,6 +51,6 @@ protected:
 	void Die();
 
 private:
-
+	float CurrentHealth;
 		
 };
