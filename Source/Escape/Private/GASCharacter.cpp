@@ -31,7 +31,6 @@ int32 AGASCharacter::GetCharacterLevel() const
 {
 	return CharacterLevel;
 }
-
 float AGASCharacter::GetHealth() const
 {
 	if (!AttributeSet) {
