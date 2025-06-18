@@ -21,6 +21,8 @@ void UHealthComponent::BeginPlay()
 
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
 
+	
+
 	// ...
 	
 }
