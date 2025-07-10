@@ -1,31 +1,21 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GASCharacter.h"
 #include "GASCharacterAttributeSet.h" 
-//#include "GASAbilitySystemComponent.h" 
 
-// Sets default values
 AGASCharacter::AGASCharacter()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Init AbilitySystem Component
 	AbilitySystemComponent = CreateDefaultSubobject<UGASAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 
-	// Init Attribute Set
 	AttributeSet = CreateDefaultSubobject<UGASCharacterAttributeSet>("AttributeSet");
+	TraitManager = CreateDefaultSubobject<UTraitManagerComponent>("TraitManager");
+	MentalResolver = CreateDefaultSubobject<UMentalStateResolverComponent>("MentalResolver");
 
-	//Set Character Set 
 	CharacterLevel = 1;
-	//DefaultAttributeEffects = nullptr;
 	DefaultAttributeEffects = TArray<TSubclassOf<UGameplayEffect>>();
 	AttackAbilityList = TArray<TSubclassOf<UGameplayAbility>>();
-
 }
-
 
 int32 AGASCharacter::GetCharacterLevel() const
 {
@@ -43,23 +33,28 @@ float AGASCharacter::GetHealth() const
 
 float AGASCharacter::GetMaxHealth() const
 {
-	if (!AttributeSet) {
+	if (!AttributeSet) 
+	{
 		return 0.0f;
 	}
 
 	return AttributeSet->GetMaxHealth();
 }
 
-float AGASCharacter::GetStamina() const {
-	if (!AttributeSet) {
+float AGASCharacter::GetStamina() const 
+{
+	if (!AttributeSet) 
+	{
 		return 0.0f;
 	}
 
 	return AttributeSet->GetStamina();
 }
 
-float AGASCharacter::GetMaxStamina() const {
-	if (!AttributeSet) {
+float AGASCharacter::GetMaxStamina() const 
+{
+	if (!AttributeSet) 
+	{
 		return 0.0f;
 	}
 
@@ -73,94 +68,109 @@ bool AGASCharacter::ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, 
 		return false;
 	}
 
-
 	return AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags, AllowRemoteActivation);
 }
 
-
-
-
-
-
-
-
-// Called when the game starts or when spawned
 void AGASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	
-}
 
+	if (MentalResolver)
+	{
+		MentalResolver->Initialise(AbilitySystemComponent);
+	}
+
+	if (HasAuthority() && TraitManager)
+	{
+		TraitManager->OnArchetypeApplied.AddDynamic(this, &AGASCharacter::HandleArchetypeApplied);
+
+		if (Asset.IsValid())
+		{
+			UE_LOG(LogTemp, Log, TEXT("[Traits] Applying direct archetype %s"), *Asset.GetAssetName());
+			TraitManager->ApplyArchetype(Asset.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("[Traits] Rolling archetype from list"));
+			TraitManager->RollArchetypes(1);
+		}
+	}
+}
 
 void AGASCharacter::SetTestAbilities() 
 {
-	if (!AbilitySystemComponent) {
+	if (!AbilitySystemComponent) 
+	{
 		return;
-
 	}
 
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		for (TSubclassOf<UGameplayAbility>& TestAbility : TestAbilities) {
-
+		for (TSubclassOf<UGameplayAbility>& TestAbility : TestAbilities) 
+		{
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(TestAbility, GetCharacterLevel(), INDEX_NONE, this));
-
 		}
 	}
 }
 
 void AGASCharacter::SetAttackAbilities()
 {
-
-	if (!AbilitySystemComponent) {
+	if (!AbilitySystemComponent) 
+	{
 		return;
-
 	}
 
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		for (TSubclassOf<UGameplayAbility>& AttackAbility : AttackAbilityList) {
-
+		for (TSubclassOf<UGameplayAbility>& AttackAbility : AttackAbilityList) 
+		{
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AttackAbility, GetCharacterLevel(), INDEX_NONE, this));
-
 		}
 	}
 }
 
+void AGASCharacter::HandleArchetypeApplied(UArchetypeDefinition* Arch)
+{
+	if (!Arch)
+	{
+		return;
+	}
 
+	UE_LOG(LogTemp, Log, TEXT("[Traits] Archetype applied: %s"), *Arch->GetName());
 
-// Called every frame
+	if (MentalResolver)
+	{
+		MentalResolver->Recompute();
+	}
+}
+
 void AGASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-// Called to bind functionality to input
 void AGASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void AGASCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (!AbilitySystemComponent) {
+	if (!AbilitySystemComponent) 
+	{
 		return;
-
 	}
-	if (EnableTestAbilities) {
+	if (EnableTestAbilities) 
+	{
 		SetTestAbilities();
 	}
 
-
 	ApplyDefaultAttributeEffects();
 	SetAttackAbilities();
-
 }
 
 UAbilitySystemComponent* AGASCharacter::GetAbilitySystemComponent() const
@@ -171,10 +181,10 @@ UAbilitySystemComponent* AGASCharacter::GetAbilitySystemComponent() const
 void AGASCharacter::HandleHealthChange(float DeltaValue, AActor* Origin)
 {
 	OnHealthChanged(DeltaValue, Origin);
-	if (GetHealth() <= 0.f) {
+	if (GetHealth() <= 0.f) 
+	{
 		OnDead();
 	}
-
 }
 
 void AGASCharacter::HandleStaminaChange(float DeltaValue, AActor* Origin)
@@ -183,7 +193,6 @@ void AGASCharacter::HandleStaminaChange(float DeltaValue, AActor* Origin)
 	//if (GetHealth() <= 0.f) {
 	//	OnDead();
 	//}
-
 }
 
 void AGASCharacter::ApplyDefaultAttributeEffects()
@@ -197,8 +206,8 @@ void AGASCharacter::ApplyDefaultAttributeEffects()
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 	EffectContext.AddSourceObject(this);
 
-
-	for (TSubclassOf <class UGameplayEffect>& DefaultEffect : DefaultAttributeEffects) {
+	for (TSubclassOf <class UGameplayEffect>& DefaultEffect : DefaultAttributeEffects) 
+	{
 		//FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributeEffects, CharacterLevel, EffectContext);
 
 		if (!IsValid(DefaultEffect))
@@ -208,19 +217,16 @@ void AGASCharacter::ApplyDefaultAttributeEffects()
 		}
 
 		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultEffect, CharacterLevel, EffectContext);
-		if (NewHandle.IsValid()) {
+		if (NewHandle.IsValid()) 
+		{
 			FActiveGameplayEffectHandle ActiveHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
 		}
 	}
-
-
 }
 
-
-void AGASCharacter::RemoveDefaultAttributeEffects() {
-
+void AGASCharacter::RemoveDefaultAttributeEffects() 
+{
 	FGameplayEffectQuery Query;
 	Query.EffectSource = this;
 	AbilitySystemComponent->RemoveActiveEffects(Query);
-
 }

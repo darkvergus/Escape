@@ -13,5 +13,4 @@ UCLASS()
 class ESCAPE_API AFirstPersonGASCharacter : public AGASCharacter
 {
 	GENERATED_BODY()
-	
 };

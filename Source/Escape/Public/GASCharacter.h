@@ -1,16 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "GASAbilitySystemComponent.h"
+#include "ArchetypeDefinition.h"
+#include "TraitManagerComponent.h"
+#include "MentalStateResolverComponent.h"
 #include "GASCharacter.generated.h"
-
-
-
-
 
 UCLASS()
 class ESCAPE_API AGASCharacter : public ACharacter, public IAbilitySystemInterface
@@ -36,19 +33,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	virtual float GetMaxStamina() const;
 
-	/*Try toi activate ALL abilities that mathc tag*/
+	/*Try to activate ALL abilities that match tag*/
 	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	bool ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, bool AllowRemoteActivation = true);
 
 	/*Called when Health Changes
-	* @param DeltaValue -  Will be negative for Stamina decrease , positive for healign
+	* @param DeltaValue -  Will be negative for health decrease , positive for healing
 	* @param Origin - Cause of Stamina Change.
 	*/
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHealthChanged(float DeltaValue, AActor* Origin);
 
 	/*Called when Health Changes
-	* @param DeltaValue -  Will be negative for health decrease , positive for healign
+	* @param DeltaValue -  Will be negative for stamina decrease , positive for healing
 	* @param Origin - Cause of Health Change.
 	*/
 	UFUNCTION(BlueprintImplementableEvent)
@@ -58,11 +55,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDead();
 
-
 	/*UFUNCTION(BlueprintCallable,  Category="GAS Abilities|Attack")
 	bool ActivateAttackAbility(bool AllowRemoteActivation = true);*/
-
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -78,12 +72,10 @@ protected:
 	int32 CharacterLevel;
 
 	//TSubclassOf<class UGameplayEffect> DefaultAttributeEffects;
-
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS Attribute")
 	TArray <TSubclassOf<class UGameplayEffect>> DefaultAttributeEffects;
 
-	/*Set this to true if you want to add test abilitiies to the character */
+	/*Set this to true if you want to add test abilities to the character */
 	UPROPERTY(EditAnywhere, Category = "GAS Attribute|Debug")
 	bool EnableTestAbilities;
 
@@ -102,10 +94,18 @@ protected:
 
 	//virtual void SetAttackAbility();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Traits")
+    UTraitManagerComponent* TraitManager;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Traits")
+	TSoftObjectPtr<UArchetypeDefinition> Asset;
 
+	UFUNCTION()
+	void HandleArchetypeApplied(UArchetypeDefinition* Arch);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Traits|Mental")
+	UMentalStateResolverComponent* MentalResolver;
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
@@ -117,12 +117,8 @@ public:
 	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	virtual void HandleHealthChange(float DeltaValue, AActor* Origin);
-
 	virtual void HandleStaminaChange(float DeltaValue, AActor* Origin);
 
 	virtual void ApplyDefaultAttributeEffects();
-
 	virtual void RemoveDefaultAttributeEffects();
-
-
 };

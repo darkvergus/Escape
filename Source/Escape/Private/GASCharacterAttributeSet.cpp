@@ -1,17 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GASCharacterAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectExtension.h"
 #include "GASCharacter.h"
 
-UGASCharacterAttributeSet::UGASCharacterAttributeSet()
-{
-
-
-}
+UGASCharacterAttributeSet::UGASCharacterAttributeSet() { }
 
 void UGASCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -19,7 +14,14 @@ void UGASCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	DOREPLIFETIME(UGASCharacterAttributeSet, MaxHealth);
 	DOREPLIFETIME(UGASCharacterAttributeSet, Stamina);
 	DOREPLIFETIME(UGASCharacterAttributeSet, MaxStamina);
-
+	DOREPLIFETIME(UGASCharacterAttributeSet, HearingRadius);
+	DOREPLIFETIME(UGASCharacterAttributeSet, FootstepVolume);
+	DOREPLIFETIME(UGASCharacterAttributeSet, BreathVolume);
+	DOREPLIFETIME(UGASCharacterAttributeSet, SneakSpeedScalar);
+	DOREPLIFETIME(UGASCharacterAttributeSet, OutgoingDamageScalar);
+	DOREPLIFETIME(UGASCharacterAttributeSet, EnemyRecoveryScalar);
+	DOREPLIFETIME(UGASCharacterAttributeSet, IncomingDamageScalar);
+	DOREPLIFETIME(UGASCharacterAttributeSet, HitReactScalar);
 }
 
 void UGASCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
@@ -58,9 +60,6 @@ void UGASCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectM
 			GASCharacter->HandleStaminaChange(DeltaValue, Data.EffectSpec.GetContext().GetInstigator());
 		}
 	}
-
-
-
 }
 
 void UGASCharacterAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -86,8 +85,6 @@ void UGASCharacterAttributeSet::AdjustAttributeForMaxChange(FGameplayAttributeDa
 		AbilitySystemComponent->ApplyModToAttributeUnsafe(AffectedAttributeProperty, EGameplayModOp::Additive, NewDelta);
 
 	}
-
-
 }
 
 void UGASCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
@@ -108,5 +105,45 @@ void UGASCharacterAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldS
 void UGASCharacterAttributeSet::OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, MaxStamina, OldMaxStamina);
+}
+
+void UGASCharacterAttributeSet::OnRep_HearingRadius(const FGameplayAttributeData& OldHearingRadius)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, HearingRadius, OldHearingRadius);
+}
+
+void UGASCharacterAttributeSet::OnRep_FootstepVolume(const FGameplayAttributeData& OldFootstepVolume)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, FootstepVolume, OldFootstepVolume);
+}
+
+void UGASCharacterAttributeSet::OnRep_BreathVolume(const FGameplayAttributeData& OldBreathVolume)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, BreathVolume, OldBreathVolume);
+}
+
+void UGASCharacterAttributeSet::OnRep_SneakSpeedScalar(const FGameplayAttributeData& OldSneakSpeed)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, SneakSpeedScalar, OldSneakSpeed);
+}
+
+void UGASCharacterAttributeSet::OnRep_OutgoingDamageScalar(const FGameplayAttributeData& OldOutgoingDamage)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, OutgoingDamageScalar, OldOutgoingDamage);
+}
+
+void UGASCharacterAttributeSet::OnRep_EnemyRecoveryScalar(const FGameplayAttributeData& OldEnemyRecovery)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, EnemyRecoveryScalar, OldEnemyRecovery);
+}
+
+void UGASCharacterAttributeSet::OnRep_IncomingDamageScalar(const FGameplayAttributeData& OldIncomingDamage)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, IncomingDamageScalar, OldIncomingDamage);
+}
+
+void UGASCharacterAttributeSet::OnRep_HitReactScalar(const FGameplayAttributeData& OldHitReact)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGASCharacterAttributeSet, HitReactScalar, OldHitReact);
 }
 

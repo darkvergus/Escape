@@ -25,14 +25,11 @@ class ESCAPE_API UGASCharacterAttributeSet : public UAttributeSet
 public:
 	UGASCharacterAttributeSet();
 
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)override;
-
-
 
 	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_Health)
 	FGameplayAttributeData Health;
@@ -49,6 +46,38 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_MaxStamina)
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, MaxStamina);
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_HearingRadius)
+	FGameplayAttributeData HearingRadius;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, HearingRadius)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_FootstepVolume)
+	FGameplayAttributeData FootstepVolume;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, FootstepVolume)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_BreathVolume)
+	FGameplayAttributeData BreathVolume;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, BreathVolume)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_SneakSpeedScalar)
+	FGameplayAttributeData SneakSpeedScalar;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, SneakSpeedScalar)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_OutgoingDamageScalar)
+	FGameplayAttributeData OutgoingDamageScalar;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, OutgoingDamageScalar)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_EnemyRecoveryScalar)
+	FGameplayAttributeData EnemyRecoveryScalar;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, EnemyRecoveryScalar)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_IncomingDamageScalar)
+	FGameplayAttributeData IncomingDamageScalar;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, IncomingDamageScalar)
+
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attributes", ReplicatedUsing = OnRep_HitReactScalar)
+	FGameplayAttributeData HitReactScalar;
+	ATTRIBUTE_ACCESSORS(UGASCharacterAttributeSet, HitReactScalar)
 
 protected:
 
@@ -71,5 +100,27 @@ protected:
 	UFUNCTION()
 	virtual void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina);
 
+	UFUNCTION()
+	virtual void OnRep_HearingRadius(const FGameplayAttributeData& OldHearingRadius);
 
+	UFUNCTION()
+	virtual void OnRep_FootstepVolume(const FGameplayAttributeData& OldFootstepVolume);
+
+	UFUNCTION()
+	virtual void OnRep_BreathVolume(const FGameplayAttributeData& OldBreathVolume);
+
+	UFUNCTION()
+	virtual void OnRep_SneakSpeedScalar(const FGameplayAttributeData& OldSneakSpeed);
+
+	UFUNCTION()
+	virtual void OnRep_OutgoingDamageScalar(const FGameplayAttributeData& OldOutgoingDamage);
+
+	UFUNCTION()
+	virtual void OnRep_EnemyRecoveryScalar(const FGameplayAttributeData& OldEnemyRecovery);
+
+	UFUNCTION()
+	virtual void OnRep_IncomingDamageScalar(const FGameplayAttributeData& OldIncomingDamage);
+
+	UFUNCTION()
+	virtual void OnRep_HitReactScalar(const FGameplayAttributeData& OldHitReact);
 };

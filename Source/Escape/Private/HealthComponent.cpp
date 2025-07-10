@@ -1,34 +1,27 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "HealthComponent.h"
+#include "GameplayTagContainer.h"
+#include "MentalStateResolverComponent.h"
+#include "GASAbilitySystemComponent.h"
 
-// Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	CurrentHealth = MaxHealth;
-	// ...
 }
 
-
-// Called when the game starts
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
-
-	// ...
-	
 }
 
 void UHealthComponent::TakeDamage(float DamageAmount)
 {
 	if (DamageAmount <= 0.0f || !IsAlive())
+	{
 		return;
+	}
 
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.0f, MaxHealth);
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
@@ -37,17 +30,22 @@ void UHealthComponent::TakeDamage(float DamageAmount)
 	{
 		Die();
 	}
+
+	BroadcastHPState();
 }
 
 void UHealthComponent::Heal(float HealAmount)
 {
 	if (HealAmount <= 0.0f || !IsAlive())
+	{
 		return;
+	}
 
 	CurrentHealth = FMath::Clamp(CurrentHealth + HealAmount, 0.0f, MaxHealth);
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
-}
 
+	BroadcastHPState();
+}
 
 void UHealthComponent::SetHealth(float NewHealth)
 {
@@ -58,6 +56,8 @@ void UHealthComponent::SetHealth(float NewHealth)
 	{
 		Die();
 	}
+
+	BroadcastHPState();
 }
 
 float UHealthComponent::GetHealth() const
@@ -68,6 +68,42 @@ float UHealthComponent::GetHealth() const
 bool UHealthComponent::IsAlive() const
 {
 	return CurrentHealth > 0.0f;
+}
+
+void UHealthComponent::BroadcastHPState()
+{
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = Owner->FindComponentByClass<UAbilitySystemComponent>();
+	if (!ASC)
+	{
+		return;
+	}
+
+	const float Percent = (MaxHealth > 0.f) ? (CurrentHealth / MaxHealth) : 0.f;
+
+	static const FGameplayTag tagHpHealthy = FGameplayTag::RequestGameplayTag(TEXT("HP.Healthy"));
+	static const FGameplayTag tagHpInjured = FGameplayTag::RequestGameplayTag(TEXT("HP.Injured"));
+	static const FGameplayTag tagHpLow = FGameplayTag::RequestGameplayTag(TEXT("HP.Low"));
+
+	FGameplayTagContainer OldTags;
+	OldTags.AddTag(tagHpHealthy);
+	OldTags.AddTag(tagHpInjured);
+	OldTags.AddTag(tagHpLow);
+	ASC->RemoveLooseGameplayTags(OldTags);
+
+	const FGameplayTag NewHP = (Percent > 0.75f) ? tagHpHealthy : (Percent > 0.30f) ? tagHpInjured : tagHpLow;
+
+	ASC->AddLooseGameplayTag(NewHP);
+
+	if (UMentalStateResolverComponent* Resolver = Owner->FindComponentByClass<UMentalStateResolverComponent>())
+	{
+		Resolver->Recompute();
+	}
 }
 
 void UHealthComponent::Die()
