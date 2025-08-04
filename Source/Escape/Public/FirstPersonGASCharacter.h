@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GASCharacter.h"
+#include "ESwipeAttack.h" 
 #include "FirstPersonGASCharacter.generated.h"
 
 /**
@@ -13,5 +14,13 @@ UCLASS()
 class ESCAPE_API AFirstPersonGASCharacter : public AGASCharacter
 {
 	GENERATED_BODY()
+
+protected: 
+	void BeginPlay() override;
+
+public : 
+	void HandleAttackSwipe(ESwipeDirection Direction);
+	
+
 	
 };

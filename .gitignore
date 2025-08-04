@@ -72,6 +72,6 @@ DerivedDataCache/*
 **/Plugins/**/Intermediate/*
 **/Plugins/**/Binaries/*
 **/Plugins/**/Saved/*
-
+**/Plugins/VisualStudioTools/*
 # Temp Files
 Config/DefaultEditorPerProjectUserSettings.ini

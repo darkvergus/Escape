@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 using UnrealBuildTool;
+using UnrealBuildTool.Rules;
 
 public class Escape : ModuleRules
 {
@@ -8,7 +9,16 @@ public class Escape : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "GameplayAbilities", "GameplayTags", "GameplayTasks" });
+		PublicDependencyModuleNames.AddRange(new string[] {
+            "EnhancedInput",
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
+             });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
