@@ -13,16 +13,22 @@ void AACombatPlayerController::SetupInputComponent()
 {
 
     Super::SetupInputComponent();
-
+    UE_LOG(LogTemp, Error, TEXT("AttackSwipeAction is HERE."));
 
     UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent);
-    if (Input && IA_AttackSwipe)
+    if (Input && AttackSwipeAction)
     {
-        Input->BindAction(IA_AttackSwipe, ETriggerEvent::Started, this, &AACombatPlayerController::OnAttackMousePressed);
-        Input->BindAction(IA_AttackSwipe, ETriggerEvent::Completed, this, &AACombatPlayerController::OnAttackMouseReleased);
+        Input->BindAction(AttackSwipeAction, ETriggerEvent::Started, this, &AACombatPlayerController::OnAttackMousePressed);
+        Input->BindAction(AttackSwipeAction, ETriggerEvent::Completed, this, &AACombatPlayerController::OnAttackMouseReleased);
     }
 
-    if(IA_AttackSwipe) UE_LOG(LogTemp, Warning, TEXT("IA_AttackSwipe"));
+    if (!AttackSwipeAction)
+    {
+        UE_LOG(LogTemp, Error , TEXT("AttackSwipeAction is NULL! Please assign it in Blueprint."));
+    }
+    else {
+        UE_LOG(LogTemp, Error, TEXT("AttackSwipeAction is HERE."));
+    }
    /* InputComponent->BindAction("IA_AttackSwipe", IE_Pressed, this, &AACombatPlayerController::OnAttackMousePressed);
     InputComponent->BindAction("AttackMouse", IE_Released, this, &AACombatPlayerController::OnAttackMouseReleased);*/
 }

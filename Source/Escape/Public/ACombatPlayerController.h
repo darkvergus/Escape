@@ -31,7 +31,7 @@ public :
     FOnAttackSwipeSignature OnAttackSwipe;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    class UInputAction* IA_AttackSwipe;
+    class UInputAction* AttackSwipeAction;
 
 protected:
     virtual void SetupInputComponent() override;
