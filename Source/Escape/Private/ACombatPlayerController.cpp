@@ -33,6 +33,7 @@ void AACombatPlayerController::SetupInputComponent()
     InputComponent->BindAction("AttackMouse", IE_Released, this, &AACombatPlayerController::OnAttackMouseReleased);*/
 }
 
+
 void AACombatPlayerController::OnAttackMousePressed()
 {
     UE_LOG(LogTemp, Warning, TEXT("Mouse Pressed detected"));

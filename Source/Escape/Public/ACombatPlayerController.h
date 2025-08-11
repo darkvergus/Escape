@@ -35,7 +35,6 @@ public :
 
 protected:
     virtual void SetupInputComponent() override;
-
 private:
     bool bIsDragging = false;
     FVector2D DragStart;
