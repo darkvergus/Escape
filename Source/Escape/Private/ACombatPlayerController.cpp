@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ACombatPlayerController.h"
@@ -37,27 +37,109 @@ void AACombatPlayerController::SetupInputComponent()
 void AACombatPlayerController::OnAttackMousePressed()
 {
     UE_LOG(LogTemp, Warning, TEXT("Mouse Pressed detected"));
-    bIsDragging = true;
+    //bIsDragging = true;
+
+    //// sTART timer 
+    //SwipeStartTime = GetWorld()->GetTimeSeconds();
+
+
+    PressTime = GetWorld()->GetTimeSeconds();
     float X, Y;
     GetMousePosition(X, Y);
-    DragStart = FVector2D(X, Y);
+    SwipeStartPos = FVector2D(X, Y);
+
+    // Double click check
+    if (PressTime - LastClickTime <= DoubleClickMaxGap)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Double Click Detected → Strong Jab"));
+        OnDoubleClick.Broadcast();
+        LastClickTime = 0; // Reset
+        return;
+    }
+
+    LastClickTime = PressTime;
+
+    // Start heavy attack charge timer
+    GetWorldTimerManager().SetTimerForNextTick([this]()
+        {
+            if (GetWorld()->GetTimeSeconds() - PressTime >= HeavyAttackChargeTime)
+            {
+                StartCharge();
+            }
+        });
 }
 
 void AACombatPlayerController::OnAttackMouseReleased()
 {
 
     UE_LOG(LogTemp, Warning, TEXT("Mouse Release detected"));
-    if (!bIsDragging) return;
-    bIsDragging = false;
+    //if (!bIsDragging) return;
+    //bIsDragging = false;
+    
+    //DetectSwipeDirection(SwipeStartPos, DragEnd);
 
+
+    ReleaseTime = GetWorld()->GetTimeSeconds();
     float X, Y;
     GetMousePosition(X, Y);
-    FVector2D DragEnd(X, Y);
 
-    DetectSwipeDirection(DragStart, DragEnd);
+    SwipeEndPos = FVector2D(X, Y);
+
+    float HoldDuration = ReleaseTime - PressTime;
+
+    // Heavy Attack Swipe
+    if (bIsCharging)
+    {
+        bIsCharging = false;
+        float SwipeDuration = HoldDuration - HeavyAttackChargeTime;
+
+        if (SwipeDuration <= ShortSwipeMaxTime)
+        {
+            ESwipeDirection Dir = DetectSwipeDirection(SwipeStartPos, SwipeEndPos);
+            OnHeavyAttackSwipe.Broadcast(Dir);
+        }
+        return;
+    }
+
+    // Short Swipe
+    if (HoldDuration <= ShortSwipeMaxTime)
+    {
+        FVector2D Delta = SwipeEndPos - SwipeStartPos;
+        if (Delta.Size() >= MinSwipeDistance)
+        {
+            ESwipeDirection Dir = DetectSwipeDirection(SwipeStartPos, SwipeEndPos);
+            OnShortSwipe.Broadcast(Dir);
+        }
+        return;
+    }
 }
 
-void AACombatPlayerController::DetectSwipeDirection(const FVector2D& Start, const FVector2D& End)
+
+
+void AACombatPlayerController::StartCharge()
+{
+    bIsCharging = true;
+    UE_LOG(LogTemp, Log, TEXT("Heavy attack charging started"));
+    // TODO: Trigger charge animation
+
+    OnChargeSwipeStart.Broadcast();
+}
+
+void AACombatPlayerController::CancelCharge()
+{
+    bIsCharging = false;
+    UE_LOG(LogTemp, Log, TEXT("Heavy attack charging Canceled"));
+    // TODO: Trigger charge animation
+
+    OnHeavySwipeCancel.Broadcast();
+}
+
+
+
+
+
+
+ESwipeDirection AACombatPlayerController::DetectSwipeDirection(const FVector2D& Start, const FVector2D& End) const
 {
     FVector2D Delta = End - Start;
     if (Delta.Size() < 50.f) return; // Ignore small movements
@@ -66,13 +148,11 @@ void AACombatPlayerController::DetectSwipeDirection(const FVector2D& Start, cons
     ESwipeDirection Direction = ESwipeDirection::None;
 
     if (Angle >= -45.f && Angle <= 45.f)
-        Direction = ESwipeDirection::Right;
+        return ESwipeDirection::Right;
     else if (Angle > 45.f && Angle < 135.f)
-        Direction = ESwipeDirection::Up;
+        return  ESwipeDirection::Up;
     else if (Angle >= 135.f || Angle <= -135.f)
-        Direction = ESwipeDirection::Left;
+        return ESwipeDirection::Left;
     else if (Angle < -45.f && Angle > -135.f)
-        Direction = ESwipeDirection::Down;
-
-    OnAttackSwipe.Broadcast(Direction);
+        return ESwipeDirection::Down;
 }

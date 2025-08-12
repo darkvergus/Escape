@@ -13,7 +13,7 @@ void AFirstPersonGASCharacter::BeginPlay() {
     AACombatPlayerController* PC = Cast<AACombatPlayerController>(GetController());
     if (PC)
     {
-        PC->OnAttackSwipe.AddDynamic(this, &AFirstPersonGASCharacter::HandleAttackSwipe);
+        PC->OnShortSwipe.AddDynamic(this, &AFirstPersonGASCharacter::HandleAttackSwipe);
     }
 }
 
