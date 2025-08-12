@@ -142,7 +142,7 @@ void AACombatPlayerController::CancelCharge()
 ESwipeDirection AACombatPlayerController::DetectSwipeDirection(const FVector2D& Start, const FVector2D& End) const
 {
     FVector2D Delta = End - Start;
-    if (Delta.Size() < 50.f) return; // Ignore small movements
+    if (Delta.Size() < 50.f) return ESwipeDirection::None; // Ignore small movements
 
     float Angle = FMath::Atan2(Delta.Y, Delta.X) * 180.f / PI;
     ESwipeDirection Direction = ESwipeDirection::None;
@@ -155,4 +155,6 @@ ESwipeDirection AACombatPlayerController::DetectSwipeDirection(const FVector2D& 
         return ESwipeDirection::Left;
     else if (Angle < -45.f && Angle > -135.f)
         return ESwipeDirection::Down;
+
+    return ESwipeDirection::None;
 }
