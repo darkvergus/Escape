@@ -56,8 +56,8 @@ public :
 
 
     // Constants /Parameters
-    const float ShortSwipeMaxTime = 0.5f;
-    const float HeavyAttackChargeTime = 1.0f;
+    const float ShortSwipeMaxTime = 0.2f;
+    const float HeavyAttackChargeTime = .5f;
     const float MinSwipeDistance = 50.0f;
     const float DoubleClickMaxGap = 0.3f;
 
@@ -84,6 +84,7 @@ private:
 
     bool bIsCharging = false;
 
+    FTimerHandle ChargeHandle;
  
 
     void OnAttackMousePressed();

@@ -59,19 +59,43 @@ void AACombatPlayerController::OnAttackMousePressed()
 
     LastClickTime = PressTime;
 
-    // Start heavy attack charge timer
-    GetWorldTimerManager().SetTimerForNextTick([this]()
+    //// Start heavy attack charge timer
+    //GetWorldTimerManager().SetTimerForNextTick([this]()
+    //    {
+    //        
+    //        float Elapsed = GetWorld()->GetTimeSeconds() - PressTime;
+
+    //        UE_LOG(LogTemp, Log, TEXT("Held for: %f seconds"), Elapsed);
+
+    //        if (GetWorld()->GetTimeSeconds() - PressTime >= HeavyAttackChargeTime)
+    //        {
+    //            StartCharge();
+    //        }
+    //    });
+
+
+    GetWorldTimerManager().SetTimer(
+        ChargeHandle,
+        [this]()
         {
-            if (GetWorld()->GetTimeSeconds() - PressTime >= HeavyAttackChargeTime)
+            float Elapsed = GetWorld()->GetTimeSeconds() - PressTime;
+            UE_LOG(LogTemp, Log, TEXT("Held for: %f seconds"), Elapsed);
+
+            if (Elapsed >= HeavyAttackChargeTime)
             {
                 StartCharge();
+                GetWorldTimerManager().ClearTimer(ChargeHandle); // Stop checking
             }
-        });
+        },
+        0.1f,   // check every 0.1 seconds
+        true    // looping
+    );
+
 }
 
 void AACombatPlayerController::OnAttackMouseReleased()
 {
-
+    GetWorldTimerManager().ClearTimer(ChargeHandle); // Stop checking
     UE_LOG(LogTemp, Warning, TEXT("Mouse Release detected"));
     //if (!bIsDragging) return;
     //bIsDragging = false;
@@ -92,9 +116,11 @@ void AACombatPlayerController::OnAttackMouseReleased()
     {
         bIsCharging = false;
         float SwipeDuration = HoldDuration - HeavyAttackChargeTime;
+      
 
-        if (SwipeDuration <= ShortSwipeMaxTime)
+        if (SwipeDuration >= ShortSwipeMaxTime)
         {
+            UE_LOG(LogTemp, Error, TEXT("Charge"));
             ESwipeDirection Dir = DetectSwipeDirection(SwipeStartPos, SwipeEndPos);
             OnHeavyAttackSwipe.Broadcast(Dir);
         }
