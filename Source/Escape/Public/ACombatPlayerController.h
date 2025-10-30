@@ -59,7 +59,7 @@ public :
     const float ShortSwipeMaxTime = 0.2f;
     const float HeavyAttackChargeTime = .5f;
     const float MinSwipeDistance = 50.0f;
-    const float DoubleClickMaxGap = 0.3f;
+    const float DoubleClickMaxGap = 0.15f;
 
 
     // stop the charging
@@ -95,8 +95,7 @@ private:
     // Helper functions
     void StartCharge();
     ESwipeDirection DetectSwipeDirection(const FVector2D& Start, const FVector2D& End) const;
-   // void DetectSwipe(bool bFromHeavyAttack);
 
-    //FVector2D GetMousePosition2D() const;
+
 	
 };

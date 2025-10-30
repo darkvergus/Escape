@@ -106,7 +106,6 @@ void AACombatPlayerController::OnAttackMouseReleased()
     ReleaseTime = GetWorld()->GetTimeSeconds();
     float X, Y;
     GetMousePosition(X, Y);
-
     SwipeEndPos = FVector2D(X, Y);
 
     float HoldDuration = ReleaseTime - PressTime;

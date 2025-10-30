@@ -6,6 +6,24 @@
 #include "ESwipeAttack.h"
 
 
+AFirstPersonGASCharacter::AFirstPersonGASCharacter() {
+
+
+    //Weapon = CreateDefaultSubobject<AWeaponBase>(TEXT("Weapon"));
+    //Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
+
+    WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+    WeaponComponent->SetupAttachment(GetMesh(),AttachToSocketName);
+
+
+    FName SocketName = WeaponComponent->GetAttachSocketName();
+
+    UE_LOG(LogTemp, Error, TEXT("Parent Weapon : %s"),*SocketName.ToString());
+
+
+}
+
+
 void AFirstPersonGASCharacter::BeginPlay() {
 
     Super::BeginPlay();
@@ -15,6 +33,9 @@ void AFirstPersonGASCharacter::BeginPlay() {
     {
         PC->OnShortSwipe.AddDynamic(this, &AFirstPersonGASCharacter::HandleAttackSwipe);
     }
+
+
+
 }
 
 
