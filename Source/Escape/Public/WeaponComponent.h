@@ -54,4 +54,16 @@ public:
     /** Removes the current weapon */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void UnequipWeapon();
+
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    AWeaponBase* GetCurrentWeapon() const { return CurrentWeapon; }
+
+    /** Optional delegate: broadcast when a weapon is equipped */
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquippedSignature, AWeaponBase*, NewWeapon);
+
+    UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+    FOnWeaponEquippedSignature OnWeaponEquipped;
+
+
 };

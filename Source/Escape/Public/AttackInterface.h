@@ -15,11 +15,11 @@ struct FAttackData
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float Damage = 0.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Range = 150.f;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //float Range = 150.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector Direction = FVector::ZeroVector;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //FVector Direction = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FGameplayTag AttackTag;  // e.g. "Attack.Light", "Attack.Stab"
@@ -39,26 +39,20 @@ class ESCAPE_API IAttackInterface
     GENERATED_BODY()
 
 public:
-    /** Called when attack starts (animation / ability activation) */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    void StartAttack(const FAttackData& AttackData);
 
-    /** Called when attack hit should be detected (usually during montage notify) */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    void PerformHitDetection(const FAttackData& AttackData);
-
-    /** Called when attack ends */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    void StopAttack();
-
-    /** Returns true if currently in an attack window */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    bool IsAttacking() const;
-
-    /** Returns current base damage */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    float GetBaseDamage() const; 
-
+    /** Returns the currently equipped weapon */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
     AWeaponBase* GetWeapon() const;
+
+    /** Attack power multiplier (character buffs, stats, scaling) */
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
+    float GetAttackMultiplier() const;
+
+    /** Returns current attack tags (light, heavy, stab, finisher, etc) */
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
+    void GetCurrentAttackTags(FGameplayTagContainer& OutTags) const;
+
+    /** Returns the actor performing damage (mostly self) */
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
+    AActor* GetAttackInstigator() const;
 };

@@ -12,8 +12,7 @@
 
 
 UCLASS(ClassGroup = (Combat), meta = (BlueprintSpawnableComponent))
-class ESCAPE_API UPlayerAttackComponent : public UActorComponent, public IAttackInterface
-{
+class ESCAPE_API UPlayerAttackComponent : public UActorComponent{
     GENERATED_BODY()
 
 public:
@@ -26,9 +25,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack")
     bool bIsAttacking = false;
 
-    /** Base damage for attacks */
+    /** Base damage Multiplier */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-    float BaseDamage = 10.f;
+    float DamageMultiplier = 1.f;
 
     /** Attack abilities to grant at BeginPlay (like GA_LightAttack_01, GA_Stab, etc.) */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Abilities")
@@ -38,17 +37,18 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Attack|Abilities")
     TArray<FGameplayAbilitySpecHandle> GrantedAbilityHandles;
 
-    /** Base damage for attacks */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack|Abilities")
-    AWeaponBase* Weapon;
+    UPROPERTY(VisibleAnywhere, Category = "Attack|Abilities")
+    FGameplayTagContainer CurrentAttackTags; 
+
+
 
 public:
-    /** IAttackInterface implementation */
-    virtual void StartAttack_Implementation(const FAttackData& AttackData) override;
-    virtual void PerformHitDetection_Implementation(const FAttackData& AttackData) override;
-    virtual void StopAttack_Implementation() override;
-    virtual bool IsAttacking_Implementation() const override { return bIsAttacking; }
-    virtual float GetBaseDamage_Implementation() const override { return BaseDamage; }
+    UFUNCTION(BlueprintCallable, Category = "Attack")
+    float GetAttackMultiplier() const { return DamageMultiplier; }
+
+    UFUNCTION(BlueprintCallable, Category = "Attack")
+    void GetAttackTags(FGameplayTagContainer& OutTags) const { OutTags = CurrentAttackTags; }
+
 
 
 protected:

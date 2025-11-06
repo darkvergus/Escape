@@ -58,9 +58,11 @@ void UWeaponComponent::EquipWeapon(TSubclassOf<AWeaponBase> NewWeaponClass)
     if (Mesh)
     {
         NewWeapon->AttachToComponent(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+        OnWeaponEquipped.Broadcast(CurrentWeapon);
     }
 
     CurrentWeapon = NewWeapon;
+    CurrentWeapon->SetWeaponOwner(GetOwner());
 
     UE_LOG(LogTemp, Log, TEXT("Equipped weapon: %s"), *NewWeapon->GetName());
 }

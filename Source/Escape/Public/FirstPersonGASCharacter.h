@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,22 +29,13 @@ public :
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
 	UWeaponComponent* WeaponComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon", meta = (ExposeOnSpawn = true))
 	FName AttachToSocketName = "GripPoint";
 
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	//TSubclassOf<AWeaponBase> DefaultWeaponClass;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
-	//AWeaponBase* EquippedWeapon;
-
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void HandleAttackSwipe(ESwipeDirection Direction);
-
-	// Optional helper function
-	//void EquipWeapon(TSubclassOf<AWeaponBase> WeaponClass);
-
 
 	AFirstPersonGASCharacter();
 };

@@ -19,42 +19,42 @@ void UPlayerAttackComponent::BeginPlay()
     InitializeAttackAbilities();
 
 }
-
-void UPlayerAttackComponent::StartAttack_Implementation(const FAttackData& AttackData)
-{
-    bIsAttacking = true;
-    UE_LOG(LogTemp, Log, TEXT("[%s] StartAttack: %s"), *GetOwner()->GetName(), *AttackData.AttackTag.ToString());
-}
-
-void UPlayerAttackComponent::PerformHitDetection_Implementation(const FAttackData& AttackData)
-{
-    AActor* Owner = GetOwner();
-    if (!Owner) return;
-
-    FVector Start = Owner->GetActorLocation();
-    FVector End = Start + AttackData.Direction * AttackData.Range;
-    FHitResult Hit;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(Owner);
-
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Pawn, Params))
-    {
-        UE_LOG(LogTemp, Log, TEXT("[%s] Hit: %s for %.1f damage"),
-            *Owner->GetName(),
-            *Hit.GetActor()->GetName(),
-            AttackData.Damage);
-
-        // (Optional) Here you can apply a GameplayEffect if using GAS
-    }
-
-    DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.f, 0, 1.f);
-}
-
-void UPlayerAttackComponent::StopAttack_Implementation()
-{
-    bIsAttacking = false;
-    UE_LOG(LogTemp, Log, TEXT("[%s] StopAttack"), *GetOwner()->GetName());
-}
+//
+//void UPlayerAttackComponent::StartAttack_Implementation(const FAttackData& AttackData)
+//{
+//    bIsAttacking = true;
+//    UE_LOG(LogTemp, Log, TEXT("[%s] StartAttack: %s"), *GetOwner()->GetName(), *AttackData.AttackTag.ToString());
+//}
+//
+//void UPlayerAttackComponent::PerformHitDetection_Implementation(const FAttackData& AttackData)
+//{
+//    AActor* Owner = GetOwner();
+//    if (!Owner) return;
+//
+//    FVector Start = Owner->GetActorLocation();
+//    FVector End = Start + AttackData.Direction * AttackData.Range;
+//    FHitResult Hit;
+//    FCollisionQueryParams Params;
+//    Params.AddIgnoredActor(Owner);
+//
+//    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Pawn, Params))
+//    {
+//        UE_LOG(LogTemp, Log, TEXT("[%s] Hit: %s for %.1f damage"),
+//            *Owner->GetName(),
+//            *Hit.GetActor()->GetName(),
+//            AttackData.Damage);
+//
+//        // (Optional) Here you can apply a GameplayEffect if using GAS
+//    }
+//
+//    DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.f, 0, 1.f);
+//}
+//
+//void UPlayerAttackComponent::StopAttack_Implementation()
+//{
+//    bIsAttacking = false;
+//    UE_LOG(LogTemp, Log, TEXT("[%s] StopAttack"), *GetOwner()->GetName());
+//}
 
 void UPlayerAttackComponent::InitializeAttackAbilities() {
     AActor* Owner = GetOwner();

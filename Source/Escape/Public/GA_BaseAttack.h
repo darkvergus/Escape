@@ -45,7 +45,7 @@ protected:
 
     /** Called when montage notify is hit */
     UFUNCTION()
-    virtual void OnAttackHit();
+    void OnAttackHit(const FHitResult& HitResult);
 
     /** Called when montage finishes */
     UFUNCTION()

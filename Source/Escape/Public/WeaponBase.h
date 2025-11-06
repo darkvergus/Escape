@@ -8,7 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHitSignature, const FHitResult&, HitResult);
 
-UCLASS()
+UCLASS(Blueprintable)
 class ESCAPE_API AWeaponBase : public AActor
 {
 	GENERATED_BODY()
@@ -54,6 +54,14 @@ public:
     // Sets default values for this actor's properties
     AWeaponBase();
 
+    /** The actor that owns this weapon (used for hit instigation) */
+    UPROPERTY()
+    AActor* WeaponOwner = nullptr;
+
+    void SetWeaponOwner(AActor* NewOwner) { WeaponOwner = NewOwner; }
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    float GetBaseDamage() const { return BaseDamage; }
 
     /** Starts detecting hits */
     UFUNCTION(BlueprintCallable, Category = "Weapon")

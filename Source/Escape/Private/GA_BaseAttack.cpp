@@ -2,6 +2,7 @@
 
 
 #include "GA_BaseAttack.h"
+#include "AttackInterface.h"
 
 
 
@@ -20,6 +21,22 @@ void UGA_BaseAttack::ActivateAbility(
     const FGameplayEventData* TriggerEventData)
 {
     if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) return;
+
+
+    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+    AActor* Avatar = GetAvatarActorFromActorInfo();
+    IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar);
+    if (!Attacker) { EndAbility(Handle, ActorInfo, ActivationInfo, true, false); return; }
+
+    AWeaponBase* Weapon = Attacker->Execute_GetWeapon(Avatar);
+    if (Weapon)
+    {
+        Weapon->OnWeaponHit.AddDynamic(this, &UGA_BaseAttack::OnAttackHit);
+        Weapon->StartHitDetection();
+    }
+
+
 
     AGASCharacter* Character = Cast<AGASCharacter>(ActorInfo->AvatarActor.Get());
     if (Character && AttackMontage)
@@ -45,17 +62,67 @@ void UGA_BaseAttack::ActivateAbility(
 }
 
 
-void UGA_BaseAttack::OnAttackHit()
+void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
 {
+    AActor* Avatar = GetAvatarActorFromActorInfo();
+    if (!Avatar) return;
+
+    // Retrieve attacker info
+    IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar);
+    if (!Attacker) return;
+
+    const AActor* InstigatorActor = Attacker->Execute_GetAttackInstigator(Avatar);
+    AWeaponBase* Weapon = Attacker->Execute_GetWeapon(Avatar);
+
+    // Compute damage
+    float TotalDamage = Damage;
+    if (Weapon)
+        TotalDamage += Weapon->GetBaseDamage();
+
+    TotalDamage *= Attacker->Execute_GetAttackMultiplier(Avatar);
+
+    // Apply damage through GAS (if DamageEffect is set)
     if (DamageEffect)
     {
-        // Example: apply effect to target(s) — you'd hook this up to hit detection
-        // For now just log
-        UE_LOG(LogTemp, Log, TEXT("Attack hit → applying %s"), *DamageEffect->GetName());
+        FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
+        if (SpecHandle.IsValid())
+        {
+            SpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), TotalDamage);
+
+            FGameplayAbilityTargetDataHandle TargetDataHandle(
+                new FGameplayAbilityTargetData_SingleTargetHit(HitResult)
+            );
+            ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, SpecHandle, TargetDataHandle);
+        }
+    }
+    else if (AActor* HitActor = HitResult.GetActor())
+    {
+        // fallback if not using GAS for target
+       // UGameplayStatics::ApplyDamage(HitActor, TotalDamage, Avatar->GetInstigatorController(), Avatar, nullptr);
+    }
+
+    // Optional: stop on first valid hit
+    if (Weapon)
+    {
+        Weapon->StopHitDetection();
     }
 }
 
 void UGA_BaseAttack::OnMontageCompleted(UAnimMontage* Montage, bool bInterrupted)
 {
+    if (AActor* Avatar = GetAvatarActorFromActorInfo())
+    {
+        if (IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar))
+        {
+            if (AWeaponBase* Weapon = Attacker->Execute_GetWeapon(Avatar))
+            {
+                Weapon->StopHitDetection();
+                Weapon->OnWeaponHit.RemoveDynamic(this, &UGA_BaseAttack::OnAttackHit);
+            }
+        }
+    }
+
+
+
     EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
