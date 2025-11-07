@@ -50,9 +50,15 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|GAS")
     FGameplayTag WeaponTag;
 
+
+
 public:
     // Sets default values for this actor's properties
     AWeaponBase();
+
+    // checks owner and ignores their collisions. 
+    void IgnorePlayerCollisions();
+
 
     /** The actor that owns this weapon (used for hit instigation) */
     UPROPERTY()

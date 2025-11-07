@@ -18,9 +18,6 @@ AFirstPersonGASCharacter::AFirstPersonGASCharacter() {
 
     FName SocketName = WeaponComponent->GetAttachSocketName();
 
-    UE_LOG(LogTemp, Error, TEXT("Parent Weapon : %s"),*SocketName.ToString());
-
-
 }
 
 

@@ -16,6 +16,7 @@ AWeaponBase::AWeaponBase()
 
     HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
     HitCollision->SetupAttachment(Mesh);
+    HitCollision->SetCollisionObjectType(ECC_GameTraceChannel1); 
     HitCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     HitCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
     HitCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -28,15 +29,60 @@ void AWeaponBase::BeginPlay()
     {
         Collision->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnHitOverlap);
     }
+
+
+    IgnorePlayerCollisions();
+
+
+
 }
+
+void AWeaponBase::IgnorePlayerCollisions() {
+
+    if (AActor* MyOwner = GetOwner())
+    {
+        if (Mesh)
+        {
+            Mesh->IgnoreActorWhenMoving(MyOwner, true);
+        }
+
+        if (HitCollision)
+        {
+            HitCollision->IgnoreActorWhenMoving(MyOwner, true);
+            HitCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+        }
+    }
+    if (WeaponOwner)
+    {
+        if (Mesh)
+        {
+            Mesh->IgnoreActorWhenMoving(WeaponOwner, true);
+        }
+
+        if (HitCollision)
+        {
+            HitCollision->IgnoreActorWhenMoving(WeaponOwner, true);
+            HitCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+        }
+    }
+
+
+
+
+
+
+
+}
+
 
 void AWeaponBase::StartHitDetection()
 {
     if (!HitCollision) return;
 
     bIsDetectingHits = true;
-    AlreadyHitActors.Empty();
     HitCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    AlreadyHitActors.Empty();
+    bIsDetectingHits = true;
 
     UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection started"), *GetName());
 }
@@ -55,6 +101,8 @@ void AWeaponBase::OnHitOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
+
+    UE_LOG(LogTemp, Display, TEXT("AAAAAAAAAAAAAAAAA"));
     if (!bIsDetectingHits || !OtherActor || AlreadyHitActors.Contains(OtherActor))
         return;
 

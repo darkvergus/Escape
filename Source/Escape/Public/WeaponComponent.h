@@ -16,6 +16,29 @@ class ESCAPE_API UWeaponComponent : public USceneComponent
 public:
     UWeaponComponent();
 
+
+    /** Weapon to spawn and attach at BeginPlay */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<AWeaponBase> DefaultWeaponClass;
+
+    /** Reference to the currently equipped weapon actor */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+    AWeaponBase* CurrentWeapon;
+    //
+    //    /** The socket name to attach the weapon to */
+
+    //
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Preview")
+    TSubclassOf<AWeaponBase> PreviewWeaponClass;
+
+#if WITH_EDITORONLY_DATA
+    // Keep a persistent pointer to the preview weapon
+    UPROPERTY(Transient)
+    AWeaponBase* PreviewWeaponActor = nullptr;
+#endif
+
+
+
 protected:
     virtual void BeginPlay() override;
     
@@ -25,28 +48,9 @@ protected:
 
 private :
     void UpdatePreviewWeapon();
+
+
 public:
-
-    /** Weapon to spawn and attach at BeginPlay */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-    TSubclassOf<AWeaponBase> DefaultWeaponClass;
-
-    /** Reference to the currently equipped weapon actor */
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-    AWeaponBase* CurrentWeapon;
-//
-//    /** The socket name to attach the weapon to */
-
-//
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Preview")
-    TSubclassOf<AWeaponBase> PreviewWeaponClass;
-
-    #if WITH_EDITORONLY_DATA
-    // Keep a persistent pointer to the preview weapon
-    UPROPERTY(Transient)
-    AWeaponBase* PreviewWeaponActor = nullptr;
-    #endif
-
     /** Spawns and attaches a weapon */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void EquipWeapon(TSubclassOf<AWeaponBase> NewWeaponClass);
