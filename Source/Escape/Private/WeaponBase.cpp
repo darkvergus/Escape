@@ -102,7 +102,7 @@ void AWeaponBase::OnHitOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
     bool bFromSweep, const FHitResult& SweepResult)
 {
 
-    UE_LOG(LogTemp, Display, TEXT("AAAAAAAAAAAAAAAAA"));
+   
     if (!bIsDetectingHits || !OtherActor || AlreadyHitActors.Contains(OtherActor))
         return;
 

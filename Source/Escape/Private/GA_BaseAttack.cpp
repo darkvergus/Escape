@@ -20,23 +20,39 @@ void UGA_BaseAttack::ActivateAbility(
     const FGameplayAbilityActivationInfo ActivationInfo,
     const FGameplayEventData* TriggerEventData)
 {
+
+   
+
     if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) return;
 
 
-    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
     AActor* Avatar = GetAvatarActorFromActorInfo();
-    IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar);
-    if (!Attacker) { EndAbility(Handle, ActorInfo, ActivationInfo, true, false); return; }
 
-    AWeaponBase* Weapon = Attacker->Execute_GetWeapon(Avatar);
-    if (Weapon)
+
+
+        IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar); 
+
+
+    if (Avatar && Avatar->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
     {
-        Weapon->OnWeaponHit.AddDynamic(this, &UGA_BaseAttack::OnAttackHit);
-        Weapon->StartHitDetection();
+        UE_LOG(LogTemp, Warning, TEXT("Implements interface!"));
+        AWeaponBase* Weapon = IAttackInterface::Execute_GetWeapon(Avatar);
+
+        if (Weapon)
+        {
+            Weapon->OnWeaponHit.AddDynamic(this, &UGA_BaseAttack::OnAttackHit);
+            //Weapon->StartHitDetection();
+        }
+        UE_LOG(LogTemp, Log, TEXT("I have the Weapon"));
+
+
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Avatar does NOT implement interface"));
     }
 
-
+    
 
     AGASCharacter* Character = Cast<AGASCharacter>(ActorInfo->AvatarActor.Get());
     if (Character && AttackMontage)
@@ -48,6 +64,7 @@ void UGA_BaseAttack::ActivateAbility(
             float MontageLength = AnimInstance->Montage_Play(AttackMontage, 1.f);
             if (MontageLength > 0.f)
             {
+                
                 // Bind notify / end
                 FOnMontageEnded EndDelegate;
                 EndDelegate.BindUObject(this, &UGA_BaseAttack::OnMontageCompleted);
@@ -59,6 +76,8 @@ void UGA_BaseAttack::ActivateAbility(
     {
         EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
     }
+
+    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
 
@@ -68,43 +87,44 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
     if (!Avatar) return;
 
     // Retrieve attacker info
-    IAttackInterface* Attacker = Cast<IAttackInterface>(Avatar);
-    if (!Attacker) return;
-
-    const AActor* InstigatorActor = Attacker->Execute_GetAttackInstigator(Avatar);
-    AWeaponBase* Weapon = Attacker->Execute_GetWeapon(Avatar);
-
-    // Compute damage
-    float TotalDamage = Damage;
-    if (Weapon)
-        TotalDamage += Weapon->GetBaseDamage();
-
-    TotalDamage *= Attacker->Execute_GetAttackMultiplier(Avatar);
-
-    // Apply damage through GAS (if DamageEffect is set)
-    if (DamageEffect)
+    if (Avatar && Avatar->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
     {
-        FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
-        if (SpecHandle.IsValid())
+
+        const AActor* InstigatorActor = IAttackInterface::Execute_GetAttackInstigator(Avatar);
+        AWeaponBase* Weapon = IAttackInterface::Execute_GetWeapon(Avatar);
+
+        // Compute damage
+        float TotalDamage = Damage;
+        if (Weapon)
+            TotalDamage += Weapon->GetBaseDamage();
+
+        TotalDamage *= IAttackInterface::Execute_GetAttackMultiplier(Avatar);
+
+        // Apply damage through GAS (if DamageEffect is set)
+        if (DamageEffect)
         {
-            SpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), TotalDamage);
+            FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
+            if (SpecHandle.IsValid())
+            {
+                SpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), TotalDamage);
 
-            FGameplayAbilityTargetDataHandle TargetDataHandle(
-                new FGameplayAbilityTargetData_SingleTargetHit(HitResult)
-            );
-            ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, SpecHandle, TargetDataHandle);
+                FGameplayAbilityTargetDataHandle TargetDataHandle(
+                    new FGameplayAbilityTargetData_SingleTargetHit(HitResult)
+                );
+                ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, SpecHandle, TargetDataHandle);
+            }
         }
-    }
-    else if (AActor* HitActor = HitResult.GetActor())
-    {
-        // fallback if not using GAS for target
-       // UGameplayStatics::ApplyDamage(HitActor, TotalDamage, Avatar->GetInstigatorController(), Avatar, nullptr);
-    }
+        else if (AActor* HitActor = HitResult.GetActor())
+        {
+            // fallback if not using GAS for target
+           // UGameplayStatics::ApplyDamage(HitActor, TotalDamage, Avatar->GetInstigatorController(), Avatar, nullptr);
+        }
 
-    // Optional: stop on first valid hit
-    if (Weapon)
-    {
-        Weapon->StopHitDetection();
+        // Optional: stop on first valid hit
+        if (Weapon)
+        {
+            Weapon->StopHitDetection();
+        }
     }
 }
 
