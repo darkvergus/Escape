@@ -64,7 +64,6 @@ void UWeaponComponent::EquipWeapon(TSubclassOf<AWeaponBase> NewWeaponClass)
     CurrentWeapon = NewWeapon;
     CurrentWeapon->SetWeaponOwner(GetOwner());
 
-    CurrentWeapon->IgnorePlayerCollisions();
 
     UE_LOG(LogTemp, Log, TEXT("Equipped weapon: %s"), *NewWeapon->GetName());
 }

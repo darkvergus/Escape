@@ -35,16 +35,20 @@ void UGA_BaseAttack::ActivateAbility(
 
     if (Avatar && Avatar->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Implements interface!"));
+        UE_LOG(LogTemp, Warning, TEXT("Implements interface! %s"), *Avatar->GetName() );
         AWeaponBase* Weapon = IAttackInterface::Execute_GetWeapon(Avatar);
-
+        UE_LOG(LogTemp, Warning, TEXT("Avatar Multiplier %f"), IAttackInterface::Execute_GetAttackMultiplier(Avatar));
+        
+       
+        
         if (Weapon)
         {
+            UE_LOG(LogTemp, Warning, TEXT("Implements interface! Weapon %s"), *Weapon->GetName());
+
             Weapon->OnWeaponHit.AddDynamic(this, &UGA_BaseAttack::OnAttackHit);
             //Weapon->StartHitDetection();
         }
-        UE_LOG(LogTemp, Log, TEXT("I have the Weapon"));
-
+        else UE_LOG(LogTemp, Error , TEXT("NO WEAPON! "))
 
     }
     else
@@ -123,7 +127,7 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
         // Optional: stop on first valid hit
         if (Weapon)
         {
-            Weapon->StopHitDetection();
+           // Weapon->StopHitDetection();
         }
     }
 }
