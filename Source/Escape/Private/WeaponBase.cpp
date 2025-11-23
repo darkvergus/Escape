@@ -50,44 +50,48 @@ void AWeaponBase::BeginPlay()
     {
         Collision->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnHitOverlap);
     }
-    
 
+    if (HitCollision) {
+        if (UBoxComponent* Box = Cast<UBoxComponent>(HitCollision))
+        {
+
+            Shape = FCollisionShape::MakeBox(Box->GetScaledBoxExtent());
+        }
+        else if (USphereComponent* Sphere = Cast<USphereComponent>(HitCollision))
+        {
+
+            Shape = FCollisionShape::MakeSphere(Sphere->GetScaledSphereRadius());
+        }
+        else if (UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(HitCollision)) {
+
+            Shape = FCollisionShape::MakeCapsule(
+                Capsule->GetScaledCapsuleRadius(),
+                Capsule->GetScaledCapsuleHalfHeight());
+        }
+    }
    
-    
-
-    //IgnorePlayerCollisions();
-
-
 
 }
 
 
 void AWeaponBase::PerformHitTrace() {
 
-    UE_LOG(LogTemp, Log, TEXT("Tracing....."));
+
+    if (Shape.IsNearlyZero())
+    {
+        UE_LOG(LogTemp, Error, TEXT("Weapon collision shape not initialized!"));
+        return;
+    }
+
+
     FVector Start = PrevLocation;
     FVector End = HitCollision->GetComponentLocation();
-    UE_LOG(LogTemp, Log, TEXT("Tracing..... (%s)"), *Start.ToString());
 
-    FCollisionShape Shape; 
-
-    if (UBoxComponent* Box = Cast<UBoxComponent>(HitCollision))
-    {
-        Shape = FCollisionShape::MakeBox(Box->GetScaledBoxExtent());
-    }
-    else if (USphereComponent* Sphere = Cast<USphereComponent>(HitCollision))
-    {
-        Shape = FCollisionShape::MakeSphere(Sphere->GetScaledSphereRadius());
-    }
 
     if (bDebugTraces) DebugTrace(Start, End, debugDuration );
 
 
     FHitResult Hit;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(GetOwner());
-    Params.AddIgnoredActor(this);
-
 
     bool bHit = GetWorld()->SweepSingleByChannel(
         Hit,
@@ -96,13 +100,14 @@ void AWeaponBase::PerformHitTrace() {
         HitCollision->GetComponentQuat(),
         ECC_GameTraceChannel1,   // Your custom "WeaponHit" channel
         Shape,
-        Params
+        HitParams
     );
 
     
 
     if (bHit && !AlreadyHitActors.Contains(Hit.GetActor()))
     {
+        HitParams.AddIgnoredActor(Hit.GetActor());
         AlreadyHitActors.Add(Hit.GetActor());
         OnWeaponHit.Broadcast(Hit);
         if (bDebugTraces) DebugHit(Hit, debugDuration);
@@ -113,6 +118,17 @@ void AWeaponBase::PerformHitTrace() {
     PrevLocation = End;
     PrevRotation = HitCollision->GetComponentQuat();
 }
+
+void AWeaponBase::ClearHitParams() {
+
+    HitParams.ClearIgnoredActors();
+
+    HitParams.AddIgnoredActor(GetOwner());
+    HitParams.AddIgnoredActor(this);
+
+    
+}
+
 
 
 void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) {
@@ -130,7 +146,7 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             PrevRotation,
             FColor::Green,
             false,
-            0.05f // stays visible for 0.05 sec
+            duration // stays visible for 0.05 sec
         );
 
         // Draw end box
@@ -141,7 +157,7 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             HitCollision->GetComponentQuat(),
             FColor::Blue,
             false,
-            0.05f
+            duration
         );
 
         // Draw sweep line
@@ -151,7 +167,7 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             End,
             FColor::Yellow,
             false,
-            0.05f
+            duration
         );
     }
 
@@ -166,7 +182,7 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             12,
             FColor::Green,
             false,
-            0.05f
+            duration
         );
 
         DrawDebugSphere(
@@ -176,7 +192,7 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             12,
             FColor::Blue,
             false,
-            0.05f
+            duration
         );
 
         DrawDebugLine(
@@ -185,15 +201,38 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
             End,
             FColor::Yellow,
             false,
-            0.05f
+            duration
         );
     }
+
+    else if (UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(HitCollision)) {
+
+        float Radius = Capsule->GetScaledCapsuleRadius();
+        float HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+        FQuat Rotation = Capsule->GetComponentQuat();
+
+        // Draw at start position
+        DrawDebugCapsule(
+            GetWorld(),
+            Start,
+            HalfHeight,
+            Radius,
+            Rotation,
+            FColor::Blue,
+            false,
+            duration
+        );
+
+    } 
+
+
 
 }
 
 void AWeaponBase::DebugHit(FHitResult Hit, float duration) {
 
 
+    DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 50, FColor::Green, false, duration);
 }
 
 
@@ -208,6 +247,7 @@ void AWeaponBase::StartHitDetection()
     PrevRotation = HitCollision->GetComponentQuat();
        
     AlreadyHitActors.Empty();
+    ClearHitParams();
     
     bIsDetectingHits = true;
 

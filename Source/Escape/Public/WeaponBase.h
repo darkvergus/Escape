@@ -37,8 +37,8 @@ protected:
 
     FVector PrevLocation;
     FQuat PrevRotation;
-
-
+    FCollisionShape Shape;
+    FCollisionQueryParams HitParams;
 
     /** Actors hit this swing, to prevent multiple hits per swing */
     UPROPERTY()
@@ -75,6 +75,7 @@ private :
     void DebugTrace(FVector Start, FVector End, float duration);
     
     void DebugHit(FHitResult Hit, float duration);
+    void ClearHitParams();
 
 public:
     // Sets default values for this actor's properties
