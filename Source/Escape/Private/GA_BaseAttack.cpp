@@ -21,7 +21,6 @@ void UGA_BaseAttack::ActivateAbility(
     const FGameplayEventData* TriggerEventData)
 {
 
-   
 
     if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) return;
 
@@ -87,6 +86,14 @@ void UGA_BaseAttack::ActivateAbility(
 
 void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
 {
+ 
+
+    
+
+
+    UE_LOG(LogTemp, Log, TEXT("Hit -> %s "), *HitResult.GetActor()->GetName());
+
+    
     AActor* Avatar = GetAvatarActorFromActorInfo();
     if (!Avatar) return;
 

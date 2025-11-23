@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "DamageTypes.h"
+#include <Engine/HitResult.h>
 #include "WeaponBase.generated.h"
+
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHitSignature, const FHitResult&, HitResult);
@@ -32,6 +34,12 @@ protected:
     /** Whether weapon is currently detecting hits */
     bool bIsDetectingHits = false;
 
+
+    FVector PrevLocation;
+    FQuat PrevRotation;
+
+
+
     /** Actors hit this swing, to prevent multiple hits per swing */
     UPROPERTY()
     TArray<AActor*> AlreadyHitActors;
@@ -40,31 +48,54 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Stats")
     float BaseDamage = 20.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Stats")
-    float Agility = 1.0f; // could affect attack speed
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Stats")
+    //float Agility = 1.0f; // could affect attack speed
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Stats")
-    float Range = 150.f;
+   /* UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Stats")
+    float Range = 150.f;*/
 
     /** Gameplay Tag to identify the weapon type or attack category */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|GAS")
     FGameplayTag WeaponTag;
 
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Debug")
+    bool bDebugTraces = true;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Debug")
+    float debugDuration = 0.05f;
+
+
+
+
+
+
+private :
+
+    void DebugTrace(FVector Start, FVector End, float duration);
+    
+    void DebugHit(FHitResult Hit, float duration);
 
 public:
     // Sets default values for this actor's properties
     AWeaponBase();
 
+    virtual void Tick(float DeltaSeconds) override;
+
     // checks owner and ignores their collisions. 
     void IgnorePlayerCollisions();
 
+    void PerformHitTrace();
+
+    FTransform PreviousHitBoxTransform;
 
     /** The actor that owns this weapon (used for hit instigation) */
     UPROPERTY()
     AActor* WeaponOwner = nullptr;
 
     void SetWeaponOwner(AActor* NewOwner) { WeaponOwner = NewOwner; }
+
+
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     float GetBaseDamage() const { return BaseDamage; }
@@ -90,5 +121,6 @@ public:
     /** Broadcasts hit to whoever is listening (AttackComponent, GAS ability, etc.) */
     UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
     FOnWeaponHitSignature OnWeaponHit;
+
 
 };

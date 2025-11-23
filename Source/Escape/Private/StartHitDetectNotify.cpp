@@ -7,7 +7,7 @@
 
 void UStartHitDetectNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-    UE_LOG(LogTemp, Error, TEXT("INIT HIT DETECT"));
+
     if (!MeshComp) return;
 
    
@@ -18,7 +18,7 @@ void UStartHitDetectNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 
     if (Owner->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
     {
-        UE_LOG(LogTemp, Error, TEXT("INIT HIT DETECT"));
+
         AWeaponBase* Weapon = IAttackInterface::Execute_GetWeapon(Owner);
 
         if (Weapon)
