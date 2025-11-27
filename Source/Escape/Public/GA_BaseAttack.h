@@ -29,6 +29,12 @@ public:
     const FGameplayAbilityActivationInfo ActivationInfo,
     const FGameplayEventData* TriggerEventData) override;
 
+
+    /** Actors hit this swing, to prevent multiple hits per swing */
+    UPROPERTY()
+    TArray<AActor*> AlreadyHitActors;
+
+
 protected:
 
     /** Montage to play when this ability is triggered */

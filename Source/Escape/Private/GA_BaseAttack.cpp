@@ -88,10 +88,23 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
 {
  
 
+
+    if (!AlreadyHitActors.Contains(HitResult.GetActor()) )
+    {
+        AlreadyHitActors.Add(HitResult.GetActor());
+        UE_LOG(LogTemp, Log, TEXT("Hit -> %s "), *HitResult.GetActor()->GetName());
+
+
+    }
+    else {
+        UE_LOG(LogTemp, Error, TEXT("DUPLICATE HIT  -> %s "), *HitResult.GetActor()->GetName());
+        return;
+    }
+
+
+
+
     
-
-
-    UE_LOG(LogTemp, Log, TEXT("Hit -> %s "), *HitResult.GetActor()->GetName());
 
     
     AActor* Avatar = GetAvatarActorFromActorInfo();
@@ -154,6 +167,6 @@ void UGA_BaseAttack::OnMontageCompleted(UAnimMontage* Montage, bool bInterrupted
     }
 
 
-
+    AlreadyHitActors.Empty();
     EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

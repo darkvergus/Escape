@@ -1,4 +1,4 @@
-#include "WeaponBase.h"
+ï»¿#include "WeaponBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
 #include <Components/BoxComponent.h>
@@ -84,6 +84,8 @@ void AWeaponBase::PerformHitTrace() {
     }
 
 
+   
+
     FVector Start = PrevLocation;
     FVector End = HitCollision->GetComponentLocation();
 
@@ -92,6 +94,9 @@ void AWeaponBase::PerformHitTrace() {
 
 
     FHitResult Hit;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(GetOwner());
+    Params.AddIgnoredActor(this);
 
     bool bHit = GetWorld()->SweepSingleByChannel(
         Hit,
@@ -100,18 +105,26 @@ void AWeaponBase::PerformHitTrace() {
         HitCollision->GetComponentQuat(),
         ECC_GameTraceChannel1,   // Your custom "WeaponHit" channel
         Shape,
-        HitParams
+        Params
     );
 
-    
 
-    if (bHit && !AlreadyHitActors.Contains(Hit.GetActor()))
+
+    if (bHit)
     {
-        HitParams.AddIgnoredActor(Hit.GetActor());
-        AlreadyHitActors.Add(Hit.GetActor());
-        OnWeaponHit.Broadcast(Hit);
-        if (bDebugTraces) DebugHit(Hit, debugDuration);
+        AActor* HitActor = Hit.GetActor();
 
+        // -----------------------------
+        //  Duplicate hit blocker
+        // -----------------------------
+        if (!AlreadyHitActors.Contains(HitActor))
+        {
+            AlreadyHitActors.Add(HitActor);
+            OnWeaponHit.Broadcast(Hit);
+
+            if (bDebugTraces)
+                DebugHit(Hit, debugDuration);
+        }
     }
 
 
@@ -119,15 +132,6 @@ void AWeaponBase::PerformHitTrace() {
     PrevRotation = HitCollision->GetComponentQuat();
 }
 
-void AWeaponBase::ClearHitParams() {
-
-    HitParams.ClearIgnoredActors();
-
-    HitParams.AddIgnoredActor(GetOwner());
-    HitParams.AddIgnoredActor(this);
-
-    
-}
 
 
 
@@ -231,8 +235,10 @@ void AWeaponBase::DebugTrace(FVector Start, FVector End,float duration = 0.05f) 
 
 void AWeaponBase::DebugHit(FHitResult Hit, float duration) {
 
+    FColor x = FColor::MakeRandomColor();
 
-    DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 50, FColor::Green, false, duration);
+
+    DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 50, x, false, duration);
 }
 
 
@@ -247,8 +253,7 @@ void AWeaponBase::StartHitDetection()
     PrevRotation = HitCollision->GetComponentQuat();
        
     AlreadyHitActors.Empty();
-    ClearHitParams();
-    
+ 
     bIsDetectingHits = true;
 
     UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection started"), *GetName());
@@ -270,7 +275,7 @@ void AWeaponBase::OnHitOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 
 
-    UE_LOG(LogTemp, Log, TEXT("[%s_____%s] Hit ___actor: %s  ºº %s"), *this->GetName(), *OverlappedComp->GetName(), *OtherActor->GetName(), *GetOwner()->GetName());
+    UE_LOG(LogTemp, Log, TEXT("[%s_____%s] Hit ___actor: %s  ÂºÂº %s"), *this->GetName(), *OverlappedComp->GetName(), *OtherActor->GetName(), *GetOwner()->GetName());
    
     //if (!bIsDetectingHits || !OtherActor || AlreadyHitActors.Contains(OtherActor))
     //    return;
