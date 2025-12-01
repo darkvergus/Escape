@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "TraitManagerComponent.h"
 #include "ArchetypeDefinition.h"
 #include "AbilitySystemComponent.h"
@@ -115,4 +112,3 @@ void UTraitManagerComponent::ApplyArchetype(UArchetypeDefinition* Arch)
 	ActiveArchetypes.Add(Arch);
 	OnArchetypeApplied.Broadcast(Arch);
 }
-

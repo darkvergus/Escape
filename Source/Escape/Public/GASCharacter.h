@@ -41,19 +41,25 @@ public:
 	* @param DeltaValue -  Will be negative for health decrease , positive for healing
 	* @param Origin - Cause of Stamina Change.
 	*/
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	void OnHealthChanged(float DeltaValue, AActor* Origin);
 
 	/*Called when Health Changes
 	* @param DeltaValue -  Will be negative for stamina decrease , positive for healing
 	* @param Origin - Cause of Health Change.
 	*/
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	void OnStaminaChanged(float DeltaValue, AActor* Origin);
 
 	/*Called when character runs out of Health*/
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	void OnDead();
+
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute") 
+	void DebugDamage();
+
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute") 
+	void DebugHeal();
 
 	/*UFUNCTION(BlueprintCallable,  Category="GAS Abilities|Attack")
 	bool ActivateAttackAbility(bool AllowRemoteActivation = true);*/
@@ -62,14 +68,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadOnly)
-	class UAbilitySystemComponent* AbilitySystemComponent;
+	class UAbilitySystemComponent* ASC;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = "GAS Attribute")
 	class UGASCharacterAttributeSet* AttributeSet;
-
-	/*the level of the character .Cant be changed directly once character spawn. */
-	UPROPERTY(EditAnywhere, Category = "GAS Attribute")
-	int32 CharacterLevel;
 
 	//TSubclassOf<class UGameplayEffect> DefaultAttributeEffects;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS Attribute")

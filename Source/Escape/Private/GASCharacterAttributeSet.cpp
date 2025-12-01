@@ -1,7 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "GASCharacterAttributeSet.h"
+﻿#include "GASCharacterAttributeSet.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayTagContainer.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectExtension.h"
 #include "GASCharacter.h"
@@ -29,7 +28,8 @@ void UGASCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectM
 	Super::PostGameplayEffectExecute(Data);
 
 	float DeltaValue = 0;
-	if (Data.EvaluatedData.ModifierOp == EGameplayModOp::Additive) {
+	if (Data.EvaluatedData.ModifierOp == EGameplayModOp::Additive) 
+	{
 		DeltaValue = Data.EvaluatedData.Magnitude;
 	}
 
@@ -42,21 +42,52 @@ void UGASCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectM
 		GASCharacter = Cast<AGASCharacter>(TargetActor);
 	}
 
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
+		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
 
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute()) {
-		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
-		if (GASCharacter) {
-			GASCharacter->HandleHealthChange(DeltaValue, Data.EffectSpec.GetContext().GetInstigator());
+		if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+		{
+			const float Percent = GetHealth() / FMath::Max(GetMaxHealth(), 1.f);
+
+			static const FGameplayTag TagHPHealthy = FGameplayTag::RequestGameplayTag(TEXT("HP.Healthy"));
+			static const FGameplayTag TagHPInjured = FGameplayTag::RequestGameplayTag(TEXT("HP.Injured"));
+			static const FGameplayTag TagHPLow = FGameplayTag::RequestGameplayTag(TEXT("HP.Low"));
+
+			FGameplayTagContainer TagsToRemove;
+			TagsToRemove.AddTag(TagHPHealthy);
+			TagsToRemove.AddTag(TagHPInjured);
+			TagsToRemove.AddTag(TagHPLow);
+
+			ASC->RemoveLooseGameplayTags(TagsToRemove);
+
+			const FGameplayTag NewHP = Percent > .75f ? TagHPHealthy : Percent > .30f ? TagHPInjured : TagHPLow;
+
+			ASC->AddLooseGameplayTag(NewHP);
+
+			UE_LOG(LogTemp, Log, TEXT("Health %.0f / %.0f  |  HP tag = %s"), GetHealth(), GetMaxHealth(), *NewHP.ToString());
+
+			if (AActor* Owner = Cast<AActor>(ASC->GetAvatarActor()))
+			{
+				if (auto* Resolver = Owner->FindComponentByClass<UMentalStateResolverComponent>())
+				{
+					Resolver->Recompute();
+				}
+			}
 		}
 
-
+		if (AGASCharacter* Char = Cast<AGASCharacter>(Data.Target.GetAvatarActor()))
+		{
+			Char->HandleHealthChange(Data.EvaluatedData.Magnitude, Data.EffectSpec.GetContext().GetInstigator());
+		}
 	}
 
-	if (Data.EvaluatedData.Attribute == GetStaminaAttribute()) {
-
+	if (Data.EvaluatedData.Attribute == GetStaminaAttribute()) 
+	{
 		bool StaminaOverflow = GetStamina() > GetMaxStamina() ? FMath::IsNearlyEqual(GetStamina() - DeltaValue, GetMaxStamina()) : false;
 		SetStamina(FMath::Clamp(GetStamina(), 0.0f, GetMaxStamina()));
-		if (GASCharacter && !StaminaOverflow) {
+		if (GASCharacter && !StaminaOverflow) 
+		{
 			GASCharacter->HandleStaminaChange(DeltaValue, Data.EffectSpec.GetContext().GetInstigator());
 		}
 	}
@@ -65,12 +96,14 @@ void UGASCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectM
 void UGASCharacterAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
-	if (Attribute == GetMaxHealthAttribute()) {
+	/*if (Attribute == GetMaxHealthAttribute())
+	{
 		AdjustAttributeForMaxChange(Health, MaxHealth, NewValue, GetHealthAttribute());
 	}
-	if (Attribute == GetMaxStaminaAttribute()) {
+	if (Attribute == GetMaxStaminaAttribute()) 
+	{
 		AdjustAttributeForMaxChange(Stamina, MaxStamina, NewValue, GetStaminaAttribute());
-	}
+	}*/
 }
 
 void UGASCharacterAttributeSet::AdjustAttributeForMaxChange(FGameplayAttributeData& AffectedAttribute, const FGameplayAttributeData& MaxAttribute, float NewMaxValue, const FGameplayAttribute& AffectedAttributeProperty)
@@ -78,12 +111,11 @@ void UGASCharacterAttributeSet::AdjustAttributeForMaxChange(FGameplayAttributeDa
 	UAbilitySystemComponent* AbilitySystemComponent = GetOwningAbilitySystemComponent();
 	const float CurrentMaxValue = MaxAttribute.GetCurrentValue();
 
-	if (!FMath::IsNearlyEqual(CurrentMaxValue, NewMaxValue) && AbilitySystemComponent) {
-
+	if (!FMath::IsNearlyEqual(CurrentMaxValue, NewMaxValue) && AbilitySystemComponent) 
+	{
 		const float CurrentValue = AffectedAttribute.GetCurrentValue();
 		float NewDelta = CurrentValue > 0.f ? (CurrentValue * NewMaxValue / CurrentMaxValue) - CurrentValue : NewMaxValue;
 		AbilitySystemComponent->ApplyModToAttributeUnsafe(AffectedAttributeProperty, EGameplayModOp::Additive, NewDelta);
-
 	}
 }
 
