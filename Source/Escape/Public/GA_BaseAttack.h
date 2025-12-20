@@ -45,6 +45,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
     float Damage = 10.f;
 
+    /** PushBack value on successful hit */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack" )
+    float ImpactValue = 500.f;
+
     /** GameplayEffect to apply to target (optional) */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
     TSubclassOf<UGameplayEffect> DamageEffect;
@@ -52,6 +56,27 @@ protected:
     /** Called when montage notify is hit */
     UFUNCTION()
     void OnAttackHit(const FHitResult& HitResult);
+    // Holds the Damage formula 
+    UFUNCTION()
+    float ComputeDamage();
+    // Gets Weapon Reference 
+    UFUNCTION()
+    AWeaponBase* TryGetWeapon();
+
+
+        UFUNCTION()
+    void  HandleHitDynamicObject(const FHitResult& HitResult, FDamageInfo DamageInfo);
+    UFUNCTION()
+    void HandleHitStaticObject(const FHitResult& HitResult, FDamageInfo DamageInfo);
+    UFUNCTION()
+    void HandleHitEnemy(const FHitResult& HitResult, FDamageInfo DamageInfo);
+    UFUNCTION()
+    void HandleHitDamageItem(const FHitResult& HitResult, FDamageInfo DamageInfo);
+
+
+
+
+
 
     /** Called when montage finishes */
     UFUNCTION()

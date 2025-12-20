@@ -39,13 +39,6 @@ struct FDamageInfo
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
     EDamageType DamageType = EDamageType::Light;
 
-    /** Critical hit bonus multiplier (e.g. 2.0x) */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    float CritMultiplier = 1.0f;
-
-    /** Was this a critical hit? */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    bool bIsCritical = false;
 
     /** Source of the damage (instigating actor) */
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
@@ -69,7 +62,7 @@ struct FDamageInfo
 
     /** Gameplay tags associated with the damage (e.g., "Fire", "Bleed") */
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    FGameplayTagContainer DamageTags;
+    FGameplayTagContainer AttackTags;
 
     /** Status effects that should be applied with this damage */
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
