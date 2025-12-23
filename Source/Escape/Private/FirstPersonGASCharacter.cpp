@@ -13,10 +13,9 @@ AFirstPersonGASCharacter::AFirstPersonGASCharacter() {
     //Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
 
     WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
-    WeaponComponent->SetupAttachment(GetMesh(),AttachToSocketName);
+    
+    //WeaponComponent->SetupAttachment(GetMesh(),AttachToSocketName);
 
-
-    FName SocketName = WeaponComponent->GetAttachSocketName();
 
 }
 

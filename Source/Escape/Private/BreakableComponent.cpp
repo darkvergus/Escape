@@ -55,7 +55,8 @@ void UBreakableComponent::ReceiveDamage_Implementation(
         return;
 
     CurrentHealth -= DamageInfo.Damage;
-
+    // 🔊 TODO: play on hit sound (use DamageInfo / PhysMaterial)
+    // 💥 TODO: spawn  on hit VFX
  
 
     if (CurrentHealth <= 0.f)
@@ -72,7 +73,11 @@ void UBreakableComponent::Break(const FDamageInfo& DamageInfo)
     if (!Owner) return;
 
     // 🔊 TODO: play break sound (use DamageInfo / PhysMaterial)
-    // 💥 TODO: spawn VFX
+    // 💥 TODO: spawn  break VFX
+
+
+    OnDeath.Broadcast();
+
 
     if (bDestroyOnBreak)
     {

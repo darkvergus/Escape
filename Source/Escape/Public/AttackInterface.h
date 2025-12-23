@@ -54,5 +54,5 @@ public:
 
     /** Returns the actor performing damage (mostly self) */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attack")
-    AActor* GetAttackInstigator() const;
+    AActor* GetAttackInstigator() ;
 };

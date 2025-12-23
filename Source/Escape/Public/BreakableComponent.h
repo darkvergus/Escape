@@ -8,6 +8,8 @@
 #include "BreakableComponent.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ESCAPE_API UBreakableComponent : public UActorComponent, public IIDamageableInterface
 {
@@ -16,6 +18,10 @@ class ESCAPE_API UBreakableComponent : public UActorComponent, public IIDamageab
 public:	
 	// Sets default values for this component's properties
 	UBreakableComponent();
+
+    /** Called once when health reaches zero */
+    UPROPERTY(BlueprintAssignable, Category = "Breakable")
+    FOnDeathSignature OnDeath;
 
 protected:
     virtual void BeginPlay() override;

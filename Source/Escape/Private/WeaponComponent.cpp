@@ -9,12 +9,36 @@ UWeaponComponent::UWeaponComponent()
 {
    PrimaryComponentTick.bCanEverTick = false;
 
+
+
+
+   AActor* Owner = GetOwner();
+
+
+
+   if (!Owner) return;
+   else {
+
+       USkeletalMeshComponent* OwnerMesh =
+           Owner->FindComponentByClass<USkeletalMeshComponent>();
+       if (!OwnerMesh)
+       {
+           UE_LOG(LogTemp, Error, TEXT("WeaponComponent: Owner has no SkeletalMeshComponent"));
+
+       }
+       else {
+           this->SetupAttachment(OwnerMesh, AttachToSocketName);
+       }
+
+   }
    
 }
 
 void UWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
+    
+
 
 
     if (DefaultWeaponClass)

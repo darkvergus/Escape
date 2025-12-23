@@ -36,7 +36,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	virtual float GetMaxStamina() const;
 
-	/*Try toi activate ALL abilities that mathc tag*/
+	/*Try to activate ALL abilities that mathc tag*/
 	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
 	bool ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, bool AllowRemoteActivation = true);
 

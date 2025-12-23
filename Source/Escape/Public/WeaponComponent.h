@@ -27,6 +27,9 @@ public:
     //
     //    /** The socket name to attach the weapon to */
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon", meta = (ExposeOnSpawn = true))
+    FName AttachToSocketName = "GripPoint";
+
     //
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Preview")
     TSubclassOf<AWeaponBase> PreviewWeaponClass;
@@ -62,6 +65,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     AWeaponBase* GetCurrentWeapon() const { return CurrentWeapon; }
+
+
 
     /** Optional delegate: broadcast when a weapon is equipped */
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquippedSignature, AWeaponBase*, NewWeapon);
