@@ -31,11 +31,11 @@ bool UBreakableComponent::CanBeDamaged_Implementation() const
     return bCanBeDamaged && CurrentHealth > 0.f;
 }
 
-EBlockResult UBreakableComponent::TryBlock_Implementation(
+EDamageResult UBreakableComponent::TryBlock_Implementation(
     const FDamageInfo& DamageInfo)
 {
     // Breakables NEVER block
-    return EBlockResult::NotBlocking;
+    return EDamageResult::Damaged;
 }
 
 float UBreakableComponent::GetCurrentHealth_Implementation() const
@@ -48,11 +48,11 @@ float UBreakableComponent::GetMaxHealth_Implementation() const
     return MaxHealth;
 }
 
-void UBreakableComponent::ReceiveDamage_Implementation(
+EDamageResult UBreakableComponent::ReceiveDamage_Implementation(
     const FDamageInfo& DamageInfo)
 {
     if (!CanBeDamaged_Implementation())
-        return;
+        return EDamageResult::Ignored;
 
     CurrentHealth -= DamageInfo.Damage;
     // 🔊 TODO: play on hit sound (use DamageInfo / PhysMaterial)
@@ -62,7 +62,10 @@ void UBreakableComponent::ReceiveDamage_Implementation(
     if (CurrentHealth <= 0.f)
     {
         Break(DamageInfo);
+
+        return EDamageResult::Killed;
     }
+    return EDamageResult::Damaged;
 }
 
 void UBreakableComponent::Break(const FDamageInfo& DamageInfo) 

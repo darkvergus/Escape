@@ -18,14 +18,6 @@ class UIDamageableInterface : public UInterface
     GENERATED_BODY()
 };
 
-UENUM(BlueprintType)
-enum class EBlockResult : uint8
-{
-    NotBlocking    UMETA(DisplayName = "NotBlocking"),
-    Blocked        UMETA(DisplayName = "Blocked"),
-    Parried        UMETA(DisplayName = "Parried")
-};
-
 
 
 class ESCAPE_API IIDamageableInterface
@@ -35,7 +27,7 @@ class ESCAPE_API IIDamageableInterface
 public:
     /** Called to apply damage / hit. Implementation MUST handle health deduction, hit reactions, block checks, etc. */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-    void ReceiveDamage(const FDamageInfo& DamageInfo);
+    EDamageResult ReceiveDamage(const FDamageInfo& DamageInfo);
 
     /**
      * Optional: Query whether the object can currently be damaged (e.g. invulnerable states).
@@ -50,7 +42,7 @@ public:
      * Ability/weapon can use this to react (e.g., cancel attack).
      */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-    EBlockResult TryBlock(const FDamageInfo& DamageInfo);
+    EDamageResult TryBlock(const FDamageInfo& DamageInfo);
 
     /** Query current health (useful for UI or logic). */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")

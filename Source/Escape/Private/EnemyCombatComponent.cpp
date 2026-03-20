@@ -24,18 +24,35 @@ void UEnemyCombatComponent::InitializeAttackAbilities(){
     AActor* Owner = GetOwner();
     if (!Owner) return;
 
-    UAbilitySystemComponent* ASC = nullptr;
 
-    if (IAbilitySystemInterface* AbilityInterface = Cast<IAbilitySystemInterface>(Owner))
-    {
-        ASC = AbilityInterface->GetAbilitySystemComponent();
-    }
 
-    if (!ASC)
+    IAbilitySystemInterface* AbilityInterface = Cast<IAbilitySystemInterface>(Owner);
+    if (!AbilityInterface)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[%s] No AbilitySystemComponent found, cannot grant attack abilities."), *Owner->GetName());
+        UE_LOG(LogTemp, Error,
+            TEXT("[%s] Owner does not implement AbilitySystemInterface."),
+            *Owner->GetName());
         return;
     }
+
+    UAbilitySystemComponent* ASC = AbilityInterface->GetAbilitySystemComponent();
+    if (!ASC)
+    {
+        UE_LOG(LogTemp, Error,
+            TEXT("[%s] AbilitySystemComponent is null."),
+            *Owner->GetName());
+        return;
+    }
+
+    // VERY IMPORTANT: ensure ASC is initialized
+    if (!ASC->AbilityActorInfo.IsValid())
+    {
+        UE_LOG(LogTemp, Error,
+            TEXT("[%s] AbilityActorInfo not initialized yet. Delaying ability grant."),
+            *Owner->GetName());
+        return;
+    }
+
 
     // Grant each ability in AttackAbilityClasses
     for (TSubclassOf<UGameplayAbility> AbilityClass : AttackAbilityClasses)

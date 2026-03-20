@@ -8,20 +8,6 @@
 #include "DamageTypes.generated.h"
 
 
-
-UENUM(BlueprintType)
-enum class EDamageType : uint8
-{
-    Heavy     UMETA(DisplayName = "Heavy"),
-    Light      UMETA(DisplayName = "Light"),
-    Push         UMETA(DisplayName = "Push"),
-    GuardBreak      UMETA(DisplayName = "GuardBreak"),
-    Unblockable          UMETA(DisplayName = "Unblockable")
-    //TrueDamage   UMETA(DisplayName = "True Damage"), // Ignores armor/resistance
-    //Custom       UMETA(DisplayName = "Custom")
-};
-
-
 /**
  * 
  */
@@ -31,46 +17,40 @@ struct FDamageInfo
 {
     GENERATED_BODY()
 
-    /** Raw damage to apply */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    float Damage = 0.0f;
+    /** Final or base damage */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float Damage = 0.f;
 
-    /** The type of damage (optional logic usage) */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    EDamageType DamageType = EDamageType::Light;
-
-
-    /** Source of the damage (instigating actor) */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
+    /** Who caused the damage */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     AActor* Instigator = nullptr;
 
-    /** Actual actor or projectile that caused the hit */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    AActor* DamageCauser = nullptr;
+    /** Optional: weapon used */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    AActor* SourceActor = nullptr;
 
-    /** The location where the hit occurred */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    FVector HitLocation = FVector::ZeroVector;
+    /** Full hit data (VERY IMPORTANT) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FHitResult HitResult;
 
-    /** The impact direction (e.g. for knockback) */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    FVector HitDirection = FVector::ForwardVector;
+    /** Attack type (light, heavy, stab, etc.) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FGameplayTag AttackTag;
 
-    /** The component that was hit, if known */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    UPrimitiveComponent* HitComponent = nullptr;
+    /** Optional flags */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bCanBeBlocked = true;
 
-    /** Gameplay tags associated with the damage (e.g., "Fire", "Bleed") */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    FGameplayTagContainer AttackTags;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bCanBeParried = true;
+};
 
-    /** Status effects that should be applied with this damage */
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Damage")
-    TArray<FGameplayTag> StatusEffects;
-
-    FDamageInfo() {}
-
-    FDamageInfo(float InDamage, EDamageType InType = EDamageType::Light)
-        : Damage(InDamage), DamageType(InType) {
-    }
+UENUM(BlueprintType)
+enum class EDamageResult : uint8
+{
+    Ignored,
+    Damaged,
+    Blocked,
+    Parried,
+    Killed
 };

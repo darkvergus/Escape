@@ -13,7 +13,7 @@ UGA_BaseAttack::UGA_BaseAttack()
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
     // Ability is activated from input, not auto
-    ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("State.Stunned")));
+    //ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("State.Stunned")));
 }
 
 void UGA_BaseAttack::ActivateAbility(
@@ -24,8 +24,13 @@ void UGA_BaseAttack::ActivateAbility(
 {
 
 
-    if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) return;
 
+
+    if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) {
+
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+        return;
+    }
 
     AActor* Avatar = GetAvatarActorFromActorInfo();
 
@@ -36,18 +41,17 @@ void UGA_BaseAttack::ActivateAbility(
 
     if (Avatar && Avatar->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Implements interface! %s"), *Avatar->GetName() );
+        //UE_LOG(LogTemp, Warning, TEXT("Implements interface! %s"), *Avatar->GetName() );
         AWeaponBase* Weapon = IAttackInterface::Execute_GetWeapon(Avatar);
-        UE_LOG(LogTemp, Warning, TEXT("Avatar Multiplier %f"), IAttackInterface::Execute_GetAttackMultiplier(Avatar));
+       // UE_LOG(LogTemp, Warning, TEXT("Avatar Multiplier %f"), IAttackInterface::Execute_GetAttackMultiplier(Avatar));
         
        
         
         if (Weapon)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Implements interface! Weapon %s"), *Weapon->GetName());
+            //UE_LOG(LogTemp, Warning, TEXT("Implements interface! Weapon %s"), *Weapon->GetName());
 
             Weapon->OnWeaponHit.AddDynamic(this, &UGA_BaseAttack::OnAttackHit);
-            
         }
         else UE_LOG(LogTemp, Error , TEXT("NO WEAPON! "))
 
@@ -59,9 +63,11 @@ void UGA_BaseAttack::ActivateAbility(
 
     
 
-    AGASCharacter* Character = Cast<AGASCharacter>(ActorInfo->AvatarActor.Get());
+    ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
     if (Character && AttackMontage)
     {
+
+
         // Play montage
         UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
         if (AnimInstance)
@@ -121,9 +127,8 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
     // Build FDamageInfo
     FDamageInfo DamageInfo;
     DamageInfo.Instigator = Avatar;
-    DamageInfo.DamageCauser = TryGetWeapon();
-    DamageInfo.HitLocation = HitResult.ImpactPoint;
-    DamageInfo.HitDirection = HitResult.ImpactNormal;
+    DamageInfo.SourceActor = TryGetWeapon();
+    DamageInfo.HitResult = HitResult;
     DamageInfo.Damage = CalcDamage;
     // DamageInfo.AttackTags = ...;
 
@@ -153,7 +158,12 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
 
 
     // 3) Damageable actors (enemies, breakables)
-    if (HitActor && HitActor->GetClass()->ImplementsInterface(UIDamageableInterface::StaticClass()))
+    if (HitActor && 
+        (HitActor->GetClass()->ImplementsInterface(UIDamageableInterface::StaticClass())
+            || 
+         HitActor->GetClass()->ImplementsInterface(UAbilitySystemInterface::StaticClass())
+        
+        ))
     {
         HandleHitEnemy(HitResult,DamageInfo);
 
@@ -165,7 +175,7 @@ void UGA_BaseAttack::OnAttackHit(const FHitResult& HitResult)
     if (HitActor && HitActor->IsA(APawn::StaticClass()))
     {
         // You may choose to call ApplyDamage as fallback
-        UGameplayStatics::ApplyDamage(HitActor, DamageInfo.Damage, /*InstigatorController*/ GetAvatarActorFromActorInfo()->GetInstigatorController(), DamageInfo.DamageCauser, nullptr);
+        UGameplayStatics::ApplyDamage(HitActor, DamageInfo.Damage, /*InstigatorController*/ GetAvatarActorFromActorInfo()->GetInstigatorController(), DamageInfo.SourceActor, nullptr);
         return;
     }
 
@@ -210,40 +220,86 @@ void UGA_BaseAttack::HandleHitEnemy(const FHitResult& HitResult, FDamageInfo Dam
     AActor* HitActor = HitResult.GetActor();
     UPrimitiveComponent* HitComp = HitResult.GetComponent();
 
+    UE_LOG(LogTemp, Log, TEXT("Hit charactr  -> %s , push by %f"), *HitActor->GetName(), ImpactValue);
 
-    // Check CanBeDamaged (target decides)
-    bool bCanBeDamaged = IIDamageableInterface::Execute_CanBeDamaged(HitActor);
-    if (!bCanBeDamaged)
-    {
-        // Target says no — maybe play a clang or ignore
-        return ;
+
+    if (IAbilitySystemInterface* TargetASCI = Cast< IAbilitySystemInterface>(HitActor)) {
+        UAbilitySystemComponent* TargetASC = TargetASCI->GetAbilitySystemComponent();
+        UE_LOG(LogTemp, Log, TEXT("Hit charactr  -> has ASC"));
+
+
+
+        if (HitActor->GetClass()->ImplementsInterface(UAttackInterface::StaticClass()))
+        {
+            
+            FGameplayEventData EventData;
+            EventData.Instigator = GetAvatarActorFromActorInfo();
+            EventData.Target = HitResult.GetActor();
+            FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+            EventData.TargetData.Add(TargetData);
+
+
+            UE_LOG(LogTemp, Log, TEXT("Hit charactr  -> Attack interface"));
+
+            if (TargetASC)
+            {
+                UE_LOG(LogTemp, Error, TEXT("send event to ->  Ability.StateTrigger.Stagger"));
+                TargetASC->HandleGameplayEvent(FGameplayTag::RequestGameplayTag(FName("Abilitiy.StateTrigger.Stagger")), &EventData);
+            }
+        }
     }
 
-    // Let target decide block/parry
-    EBlockResult BlockResult = IIDamageableInterface::Execute_TryBlock(HitActor, DamageInfo);
+    
 
-    if (BlockResult == EBlockResult::Parried)
-    {
-        // handle parry: cancel ability, play VFX/SFX, give attacker stun
-        
-        //HandleParry(HitActor, Hit);
-        
-        EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-        return ;
-    }
-    else if (BlockResult == EBlockResult::Blocked)
-    {
-        // handle block: play shield clang, stop attack
-        
-        //HandleBlock(HitActor, Hit);
-                
-        EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-        return;
+    if (HitActor->GetClass()->ImplementsInterface(UIDamageableInterface::StaticClass())) {
+
+
+        // Check CanBeDamaged (target decides)
+        bool bCanBeDamaged = IIDamageableInterface::Execute_CanBeDamaged(HitActor);
+        if (!bCanBeDamaged)
+        {
+            // Target says no — maybe play a clang or ignore
+            return;
+        }
+
+
+
+        // Let the Damager handle block logic 
+        EDamageResult result  = IIDamageableInterface::Execute_ReceiveDamage(HitActor, DamageInfo);
+        // Handle response to attack outcome 
+        switch (result){
+
+            case EDamageResult::Ignored:
+                //Tr
+                return;
+
+            case EDamageResult::Damaged:
+                //Trigger Attacker response on Successful hit
+
+                return;
+
+            case EDamageResult::Parried:
+
+                // handle parry: cancel ability, play VFX/SFX, give attacker stun
+                //HandleParry(HitActor, Hit);
+                EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+                return;
+
+            case EDamageResult::Blocked: 
+                // handle block: play shield clang, stop attack
+                //HandleBlock(HitActor, Hit);
+
+                EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+                return;
+
+            case EDamageResult::Killed:
+                //Trigger Attacker response on Kill
+                return; 
+        }        
+
     }
 
-    // Not blocked → apply damage
-    IIDamageableInterface::Execute_ReceiveDamage(HitActor, DamageInfo);
-    return;
+   
 
 }
 
@@ -256,7 +312,7 @@ void UGA_BaseAttack::HandleHitStaticObject (const FHitResult& HitResult, FDamage
     AActor* Avatar = GetAvatarActorFromActorInfo();
 
 
-    AGASCharacter* Character = Cast<AGASCharacter>(Avatar);
+    ACharacter* Character = Cast<ACharacter>(Avatar);
 
     UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
 
@@ -348,4 +404,33 @@ AWeaponBase* UGA_BaseAttack::TryGetWeapon() {
         }
     }
     return NULL;
+}
+
+void UGA_BaseAttack::EndAbility(const FGameplayAbilitySpecHandle Handle,
+    const FGameplayAbilityActorInfo* ActorInfo,
+    const FGameplayAbilityActivationInfo ActivationInfo,
+    bool bReplicateEndAbility,
+    bool bWasCancelled) {
+
+    // Makes sure the animation is stopped  the animation
+
+    if (bWasCancelled) {
+        AActor* Avatar = GetAvatarActorFromActorInfo();
+
+        if (ACharacter* Character = Cast<ACharacter>(Avatar)) {
+            UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+
+            if (AnimInstance)
+                AnimInstance->Montage_Stop(0.5f, AttackMontage);
+        }
+    }
+   
+   
+
+
+
+
+    Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility,
+        bWasCancelled);
+
 }

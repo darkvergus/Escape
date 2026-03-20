@@ -30,6 +30,12 @@ public:
     const FGameplayEventData* TriggerEventData) override;
 
 
+    virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
+        const FGameplayAbilityActorInfo* ActorInfo,
+        const FGameplayAbilityActivationInfo ActivationInfo,
+        bool bReplicateEndAbility,
+        bool bWasCancelled) override;
+
     /** Actors hit this swing, to prevent multiple hits per swing */
     UPROPERTY()
     TArray<AActor*> AlreadyHitActors;

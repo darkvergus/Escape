@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,6 +23,11 @@ public:
 
 	/** GAS */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+
+	/*Try to activate ALL abilities that mathc tag*/
+	UFUNCTION(BlueprintCallable, Category = "GAS Attribute")
+	bool ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, bool AllowRemoteActivation = true);
 
 	/** IAttackInterface */
 	virtual AWeaponBase* GetWeapon_Implementation() const override;

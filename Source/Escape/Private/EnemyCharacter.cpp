@@ -1,8 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "GASAbilitySystemComponent.h"
 #include "EnemyCharacter.h"
+
+
+
+
+
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -29,6 +32,35 @@ AEnemyCharacter::AEnemyCharacter()
 }
 
 
+
+// Called when the game starts or when spawned
+void AEnemyCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // Optional: auto-equip default weapon
+    if (WeaponComponent && WeaponComponent->DefaultWeaponClass)
+        WeaponComponent->EquipWeapon(WeaponComponent->DefaultWeaponClass);
+
+
+}
+
+
+bool AEnemyCharacter::ActivateAbilitiesWithTag(FGameplayTagContainer AbilityTags, bool AllowRemoteActivation)
+{
+    if (!AbilitySystem)
+    {
+        return false;
+    }
+
+    return AbilitySystem->TryActivateAbilitiesByTag(AbilityTags, AllowRemoteActivation);
+}
+
+
+
+
+
+
 /** IAttackInterface */
 AWeaponBase* AEnemyCharacter::GetWeapon_Implementation() const {
 
@@ -40,7 +72,7 @@ AWeaponBase* AEnemyCharacter::GetWeapon_Implementation() const {
 
 float AEnemyCharacter::GetAttackMultiplier_Implementation() const {
 
-     return  0.0f;
+    return CombatComponent ? CombatComponent->GetAttackMultiplier() : 1.0f;
 
 }
 
@@ -59,20 +91,6 @@ AActor* AEnemyCharacter::GetAttackInstigator_Implementation() {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-// Called when the game starts or when spawned
-void AEnemyCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	
-}
-
-// Called every frame
-void AEnemyCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 
 UAbilitySystemComponent* AEnemyCharacter::GetAbilitySystemComponent() const

@@ -45,12 +45,12 @@ protected:
 public:
     // ───────── IDamageableInterface ─────────
 
-    virtual void ReceiveDamage_Implementation(
+    virtual EDamageResult ReceiveDamage_Implementation(
         const FDamageInfo& DamageInfo) override;
 
     virtual bool CanBeDamaged_Implementation() const override;
 
-    virtual EBlockResult TryBlock_Implementation(
+    virtual EDamageResult TryBlock_Implementation(
         const FDamageInfo& DamageInfo) override;
 
     virtual float GetCurrentHealth_Implementation() const override;

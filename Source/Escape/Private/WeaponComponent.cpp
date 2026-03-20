@@ -28,6 +28,7 @@ UWeaponComponent::UWeaponComponent()
        }
        else {
            this->SetupAttachment(OwnerMesh, AttachToSocketName);
+
        }
 
    }
@@ -73,7 +74,7 @@ void UWeaponComponent::EquipWeapon(TSubclassOf<AWeaponBase> NewWeaponClass)
     AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(NewWeaponClass, SpawnParams);
     if (!NewWeapon)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to spawn weapon!"));
+        UE_LOG(LogTemp, Error, TEXT("Failed to spawn weapon!"));
         return;
     }
 
@@ -89,7 +90,7 @@ void UWeaponComponent::EquipWeapon(TSubclassOf<AWeaponBase> NewWeaponClass)
     CurrentWeapon->SetWeaponOwner(GetOwner());
 
 
-    UE_LOG(LogTemp, Log, TEXT("Equipped weapon: %s"), *NewWeapon->GetName());
+    //UE_LOG(LogTemp, Log, TEXT("Equipped weapon: %s"), *NewWeapon->GetName());
 }
 
 void UWeaponComponent::UnequipWeapon()

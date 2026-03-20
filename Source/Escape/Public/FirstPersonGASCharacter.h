@@ -30,8 +30,6 @@ public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
 	UWeaponComponent* WeaponComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon", meta = (ExposeOnSpawn = true))
-	FName AttachToSocketName = "GripPoint";
 
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")

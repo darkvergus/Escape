@@ -27,7 +27,7 @@ public:
     //
     //    /** The socket name to attach the weapon to */
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon", meta = (ExposeOnSpawn = true))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (ExposeOnSpawn = true))
     FName AttachToSocketName = "GripPoint";
 
     //

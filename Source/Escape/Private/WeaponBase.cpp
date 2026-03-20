@@ -256,7 +256,7 @@ void AWeaponBase::StartHitDetection()
  
     bIsDetectingHits = true;
 
-    UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection started"), *GetName());
+    //UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection started"), *GetName());
 }
 
 void AWeaponBase::StopHitDetection()
@@ -266,7 +266,7 @@ void AWeaponBase::StopHitDetection()
    
     bIsDetectingHits = false ;
 
-    UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection stopped"), *GetName());
+    //UE_LOG(LogTemp, Log, TEXT("[%s] Hit detection stopped"), *GetName());
 }
 
 void AWeaponBase::OnHitOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -275,7 +275,7 @@ void AWeaponBase::OnHitOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 
 
-    UE_LOG(LogTemp, Log, TEXT("[%s_____%s] Hit ___actor: %s  ºº %s"), *this->GetName(), *OverlappedComp->GetName(), *OtherActor->GetName(), *GetOwner()->GetName());
+    //UE_LOG(LogTemp, Log, TEXT("[%s_____%s] Hit ___actor: %s  ºº %s"), *this->GetName(), *OverlappedComp->GetName(), *OtherActor->GetName(), *GetOwner()->GetName());
    
     //if (!bIsDetectingHits || !OtherActor || AlreadyHitActors.Contains(OtherActor))
     //    return;
